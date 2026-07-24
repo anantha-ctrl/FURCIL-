@@ -4,6 +4,7 @@ import { Plus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/client';
 import { Spinner, Checkbox } from '../components/ui';
+import { inr } from '../utils/format';
 
 const blank = {
   name: '', category_id: '', brand: '', description: '', price: '', mrp: '',
@@ -39,7 +40,14 @@ export default function AdminProductForm() {
             const f = d.data.data;
             setForm((s) => ({ ...s, category_id: f.category_id, description: f.description || '' }));
             setImages((f.images || []).map((i) => ({ url: i.image_url })));
-            setVariants((f.variants || []).map((v) => ({ size: v.size || '', color: v.color || '', color_hex: v.color_hex || '', stock: v.stock, price_diff: v.price_diff })));
+            setVariants((f.variants || []).map((v) => ({
+              size: v.size || '', color: v.color || '', color_hex: v.color_hex || '',
+              // Show an absolute price; legacy variants (price=null) fall back to base + price_diff.
+              price: v.price != null ? v.price : ((Number(f.price) || 0) + (Number(v.price_diff) || 0)),
+              // Per-variant MRP; null falls back to the product base MRP.
+              mrp: v.mrp != null ? v.mrp : (Number(f.mrp) || ''),
+              stock: v.stock,
+            })));
             if (f.specifications) setSpecs(Object.entries(f.specifications).map(([k, v]) => ({ k, v })));
           }).catch(() => {});
         } else {
@@ -146,17 +154,30 @@ export default function AdminProductForm() {
       {/* Variants */}
       <div className="card space-y-3 p-6">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Variants (Size / Color)</h3>
-          <button type="button" onClick={() => setVariants([...variants, { size: '', color: '', color_hex: '#000000', stock: 0, price_diff: 0 }])}
+          <h3 className="font-semibold">Variants (Size / Pack / Colour / Price / MRP)</h3>
+          <button type="button" onClick={() => setVariants([...variants, { size: '', color: '', color_hex: '#000000', price: '', mrp: '', stock: 0 }])}
             className="text-sm text-gold"><Plus size={14} className="inline" /> Add</button>
         </div>
+        <p className="text-xs text-gray-400">
+          Enter the actual <b>selling price (₹)</b> and <b>MRP (₹)</b> for each size/pack directly, with its own stock.
+          Price empty → uses base price ({inr(Number(form.price) || 0)}); MRP empty → uses base MRP ({inr(Number(form.mrp) || 0)}).
+          MRP is the struck-through “was” price; keep it ≥ price to show a discount.
+        </p>
+        {/* Column headers */}
+        {variants.length > 0 && (
+          <div className="hidden grid-cols-7 gap-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400 sm:grid">
+            <span>Size / Pack</span><span>Colour</span><span>Swatch</span><span>Price ₹</span><span>MRP ₹</span><span>Stock</span><span></span>
+          </div>
+        )}
         {variants.map((v, i) => (
-          <div key={i} className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-            <input className="input !py-2 text-sm" placeholder="Size" value={v.size} onChange={(e) => upd(setVariants, variants, i, 'size', e.target.value)} />
-            <input className="input !py-2 text-sm" placeholder="Color" value={v.color} onChange={(e) => upd(setVariants, variants, i, 'color', e.target.value)} />
+          <div key={i} className="grid grid-cols-2 items-center gap-2 sm:grid-cols-7">
+            <input className="input !py-2 text-sm" placeholder="Size / Pack (e.g. 3kg, M)" value={v.size} onChange={(e) => upd(setVariants, variants, i, 'size', e.target.value)} />
+            <input className="input !py-2 text-sm" placeholder="Colour (optional)" value={v.color} onChange={(e) => upd(setVariants, variants, i, 'color', e.target.value)} />
             <input type="color" className="input !py-1" value={v.color_hex} onChange={(e) => upd(setVariants, variants, i, 'color_hex', e.target.value)} />
-            <input type="number" className="input !py-2 text-sm" placeholder="Stock" value={v.stock} onChange={(e) => upd(setVariants, variants, i, 'stock', e.target.value)} />
-            <button type="button" onClick={() => setVariants(variants.filter((_, x) => x !== i))} className="text-rose-500"><Trash /></button>
+            <input type="number" min="0" step="1" className="input !py-2 text-sm" placeholder="Price ₹" value={v.price} onChange={(e) => upd(setVariants, variants, i, 'price', e.target.value)} />
+            <input type="number" min="0" step="1" className="input !py-2 text-sm" placeholder="MRP ₹" value={v.mrp} onChange={(e) => upd(setVariants, variants, i, 'mrp', e.target.value)} />
+            <input type="number" min="0" className="input !py-2 text-sm" placeholder="Stock" value={v.stock} onChange={(e) => upd(setVariants, variants, i, 'stock', e.target.value)} />
+            <button type="button" onClick={() => setVariants(variants.filter((_, x) => x !== i))} className="justify-self-start text-rose-500 sm:justify-self-center"><Trash /></button>
           </div>
         ))}
       </div>
@@ -169,8 +190,8 @@ export default function AdminProductForm() {
         </div>
         {specs.map((s, i) => (
           <div key={i} className="grid grid-cols-2 gap-2">
-            <input className="input !py-2 text-sm" placeholder="Label (e.g. Material)" value={s.k} onChange={(e) => upd(setSpecs, specs, i, 'k', e.target.value)} />
-            <input className="input !py-2 text-sm" placeholder="Value (e.g. Cotton)" value={s.v} onChange={(e) => upd(setSpecs, specs, i, 'v', e.target.value)} />
+            <input className="input !py-2 text-sm" placeholder="Label (e.g. Net Weight)" value={s.k} onChange={(e) => upd(setSpecs, specs, i, 'k', e.target.value)} />
+            <input className="input !py-2 text-sm" placeholder="Value (e.g. 3kg)" value={s.v} onChange={(e) => upd(setSpecs, specs, i, 'v', e.target.value)} />
           </div>
         ))}
       </div>

@@ -50,10 +50,10 @@ export async function printInvoice(order) {
 <style>
   * { font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box; }
   body { margin: 0; padding: 40px; color: #1a1a1a; }
-  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #c9a96a; padding-bottom: 18px; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #bf924d; padding-bottom: 18px; }
   .brand { height: 56px; width: auto; object-fit: contain; }
   .muted { color: #888; font-size: 12px; }
-  h2 { margin: 0 0 4px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #c9a96a; }
+  h2 { margin: 0 0 4px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #bf924d; }
   .cols { display: flex; justify-content: space-between; gap: 30px; margin: 26px 0; font-size: 13px; }
   table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
   th { text-align: left; background: #faf6ee; padding: 10px; border-bottom: 2px solid #eadbc0; }
@@ -61,7 +61,7 @@ export async function printInvoice(order) {
   .center { text-align: center; } .right { text-align: right; }
   .totals { width: 280px; margin-left: auto; margin-top: 18px; font-size: 13px; }
   .totals div { display: flex; justify-content: space-between; padding: 6px 0; }
-  .totals .grand { border-top: 2px solid #c9a96a; margin-top: 6px; padding-top: 10px; font-size: 17px; font-weight: 800; }
+  .totals .grand { border-top: 2px solid #bf924d; margin-top: 6px; padding-top: 10px; font-size: 17px; font-weight: 800; }
   .badge { display:inline-block; padding:3px 10px; border-radius:20px; background:#e7f6ec; color:#1a8a4a; font-size:12px; font-weight:600; }
   .below { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; margin-top:18px; }
   .verify { display:flex; align-items:center; gap:14px; border:1px solid #eadbc0; background:#faf6ee; border-radius:10px; padding:12px 14px; max-width:340px; }
@@ -72,8 +72,8 @@ export async function printInvoice(order) {
 <body>
   <div class="head">
     <div>
-      <img class="brand" src="${logoUrl}" alt="Novo Clothing" />
-      <div class="muted" style="margin-top:6px">Premium fashion, curated for you.</div>
+      <img class="brand" src="${logoUrl}" alt="FURCIL" />
+      <div class="muted" style="margin-top:6px">Premium pet care, curated for you.</div>
     </div>
     <div style="text-align:right">
       <div style="font-size:20px;font-weight:700">INVOICE</div>
@@ -113,7 +113,7 @@ export async function printInvoice(order) {
     </div>
   </div>
 
-  <div class="foot">Thank you for shopping with Novo Clothing · support@novoclothing.com</div>
+  <div class="foot">Thank you for shopping with FURCIL · support@furcil.com</div>
   <script>window.onload = () => { window.print(); }</script>
 </body></html>`;
 
@@ -142,10 +142,10 @@ export function printBill(bill, config = {}) {
 <style>
   * { font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box; }
   body { margin: 0; padding: 40px; color: #1a1a1a; }
-  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #c9a96a; padding-bottom: 18px; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #bf924d; padding-bottom: 18px; }
   .brand { height: 56px; width: auto; object-fit: contain; }
   .muted { color: #888; font-size: 12px; }
-  h2 { margin: 0 0 4px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #c9a96a; }
+  h2 { margin: 0 0 4px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #bf924d; }
   .cols { display: flex; justify-content: space-between; gap: 30px; margin: 26px 0; font-size: 13px; }
   table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
   th { text-align: left; background: #faf6ee; padding: 10px; border-bottom: 2px solid #eadbc0; }
@@ -153,14 +153,14 @@ export function printBill(bill, config = {}) {
   .center { text-align: center; } .right { text-align: right; }
   .totals { width: 280px; margin-left: auto; margin-top: 18px; font-size: 13px; }
   .totals div { display: flex; justify-content: space-between; padding: 6px 0; }
-  .totals .grand { border-top: 2px solid #c9a96a; margin-top: 6px; padding-top: 10px; font-size: 17px; font-weight: 800; }
+  .totals .grand { border-top: 2px solid #bf924d; margin-top: 6px; padding-top: 10px; font-size: 17px; font-weight: 800; }
   .void { color:#e11d48; border:2px solid #e11d48; text-align:center; font-weight:700; padding:6px; margin:14px 0; border-radius:6px; }
   .foot { margin-top: 40px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #eee; padding-top: 16px; }
 </style></head>
 <body>
   <div class="head">
     <div>
-      <img class="brand" src="${logoUrl}" alt="${escapeHtml(config.store_name || 'Novo Clothing')}" />
+      <img class="brand" src="${logoUrl}" alt="${escapeHtml(config.store_name || 'FURCIL')}" />
       <div class="muted" style="margin-top:6px">${escapeHtml(config.address || 'In-store purchase')}</div>
     </div>
     <div style="text-align:right">

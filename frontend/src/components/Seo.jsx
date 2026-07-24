@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useStore } from '../context/StoreContext';
 
-const DEFAULT_DESC = 'Premium menswear, curated for the modern man. Shop tailored shirts, tees, trousers & elevated everyday staples.';
+const DEFAULT_DESC = 'Premium pet supplies, curated for every companion. Shop food, toys, grooming, habitats & accessories for dogs, cats, birds, fish & small pets.';
 
 /**
  * Per-page SEO: title, description, and Open Graph / Twitter tags.
@@ -9,7 +9,7 @@ const DEFAULT_DESC = 'Premium menswear, curated for the modern man. Shop tailore
  */
 export default function Seo({ title, description = DEFAULT_DESC, image, type = 'website' }) {
   const { name: SITE } = useStore();
-  const fullTitle = title ? `${title} — ${SITE}` : `${SITE} — Premium Fashion Store`;
+  const fullTitle = title ? `${title} — ${SITE}` : `${SITE} — Premium Pet Store`;
   return (
     <Helmet>
       <title>{fullTitle}</title>

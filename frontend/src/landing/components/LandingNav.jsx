@@ -61,12 +61,12 @@ export default function LandingNav() {
         }`}
     >
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
-        <Link to="/" aria-label="Novo Clothing home" className="shrink-0">
-          <Logo white={!solid || theme === 'dark'} className="h-10 transition-all duration-500" />
+        <Link to="/" aria-label="FURCIL home" className="shrink-0">
+          <Logo white={solid && theme === 'dark'} className="h-10 transition-all duration-500" />
         </Link>
 
         {/* Desktop links */}
-        <ul className={`hidden items-center gap-9 lg:flex ${solid ? 'text-luxe-ink dark:text-white' : 'text-white'}`}>
+        <ul className={`hidden items-center gap-9 lg:flex ${solid ? 'text-luxe-ink dark:text-white' : 'text-luxe-ink'}`}>
           {LINKS.map(([label, to]) => (
             <li key={label}>
               <Link
@@ -81,7 +81,7 @@ export default function LandingNav() {
         </ul>
 
         {/* Icons */}
-        <div className={`flex items-center gap-1 sm:gap-2 ${solid ? 'text-luxe-ink dark:text-white' : 'text-white'}`}>
+        <div className={`flex items-center gap-1 sm:gap-2 ${solid ? 'text-luxe-ink dark:text-white' : 'text-luxe-ink'}`}>
           <button onClick={toggle} className="rounded-full p-2.5 transition hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
             {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
           </button>

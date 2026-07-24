@@ -308,11 +308,15 @@ class AdminProductController
     private function syncVariants(int $productId, array $variants): void
     {
         $db = db();
-        $stmt = $db->prepare('INSERT INTO product_variants (product_id, size, color, color_hex, sku, price_diff, stock) VALUES (?,?,?,?,?,?,?)');
+        $stmt = $db->prepare('INSERT INTO product_variants (product_id, size, color, color_hex, price, mrp, sku, price_diff, stock) VALUES (?,?,?,?,?,?,?,?,?)');
         foreach ($variants as $v) {
+            // Absolute per-variant price (manual rate); NULL keeps legacy base+diff behaviour.
+            $price = (isset($v['price']) && $v['price'] !== '' && $v['price'] !== null) ? (float) $v['price'] : null;
+            // Per-variant MRP for its own strike-through / discount; NULL uses the base MRP.
+            $mrp = (isset($v['mrp']) && $v['mrp'] !== '' && $v['mrp'] !== null) ? (float) $v['mrp'] : null;
             $stmt->execute([
                 $productId, $v['size'] ?? null, $v['color'] ?? null, $v['color_hex'] ?? null,
-                $v['sku'] ?? null, (float) ($v['price_diff'] ?? 0), (int) ($v['stock'] ?? 0),
+                $price, $mrp, $v['sku'] ?? null, (float) ($v['price_diff'] ?? 0), (int) ($v['stock'] ?? 0),
             ]);
         }
     }

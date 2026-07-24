@@ -55,6 +55,7 @@ const AdminReturns = lazy(() => import('./admin/AdminReturns'));
 const AdminLoyalty = lazy(() => import('./admin/AdminLoyalty'));
 const AdminMessages = lazy(() => import('./admin/AdminMessages'));
 const AdminSettings = lazy(() => import('./admin/AdminSettings'));
+const AdminAutomation = lazy(() => import('./admin/AdminAutomation'));
 
 const AUTH_ROUTES = ['/login', '/register', '/verify-otp', '/forgot-password', '/reset-password'];
 
@@ -138,6 +139,7 @@ export default function App() {
             <Route path="messages" element={<AdminMessages />} />
             <Route path="cashiers" element={<AdminStaff />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="automation" element={<AdminAutomation />} />
             <Route path="inventory" element={<AdminInventory />} />
             <Route path="reports" element={<AdminReports />} />
           </Route>

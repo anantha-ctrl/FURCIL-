@@ -125,6 +125,8 @@ class AdminOrderController
         }
         if ($status === 'delivered') {
             $db->prepare("UPDATE orders SET payment_status='paid' WHERE id=? AND payment_method='cod'")->execute([$id]);
+            // Kick off the post-delivery mail drip (welcome, feeding guide, check-in, review, reorder).
+            Automation::onDelivered($id);
         }
 
         // Notify the customer by email about the status change.

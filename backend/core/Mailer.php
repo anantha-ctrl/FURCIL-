@@ -200,6 +200,93 @@ class Mailer
             $noteHtml");
     }
 
+    /** Storefront base URL for CTA buttons in automated emails. */
+    private static function storeUrl(): string
+    {
+        return rtrim((string) env('FRONTEND_URL', 'http://localhost:5190'), '/');
+    }
+
+    private static function button(string $label, string $href): string
+    {
+        return "<a href='$href' style='display:inline-block;margin-top:16px;padding:12px 24px;background:#bf924d;color:#1c3025;border-radius:10px;text-decoration:none;font-weight:700'>$label</a>";
+    }
+
+    // ── Mail Automation drip templates ───────────────────────────────
+
+    /** Welcome to the family — sent on delivery. */
+    public static function welcomeTemplate(string $name): string
+    {
+        $url = self::storeUrl();
+        return self::shell("
+            <p style='font-size:16px'>Welcome to the family, <b>$name</b> 🐾</p>
+            <p>Your first order has arrived — thank you for trusting us with your companion's care.
+            We hand-pick every product for quality, so you can shop with confidence.</p>
+            <p style='color:#aaa'>Here's to many happy, healthy days ahead.</p>
+            " . self::button('Explore the store', $url));
+    }
+
+    /** Product feeding / usage guide — sent the day the order is delivered. */
+    public static function feedingGuideTemplate(string $name, array $productNames = []): string
+    {
+        $items = $productNames
+            ? '<ul style="color:#ddd;margin:8px 0 0;padding-left:18px">'
+              . implode('', array_map(fn($n) => "<li style='margin:4px 0'>" . htmlspecialchars($n) . '</li>', $productNames))
+              . '</ul>'
+            : '';
+        return self::shell("
+            <p>Hi $name,</p>
+            <p>Your order has arrived 🎉 Here's how to get the best from it:</p>
+            $items
+            <div style='margin-top:14px;padding:14px 16px;background:#15151c;border-radius:10px;color:#ddd'>
+                <b style='color:#bf924d'>Feeding / usage tips</b>
+                <p style='margin:8px 0 0'>• Introduce any new food gradually over 5–7 days.<br>
+                • Follow the pack's dosage by your pet's weight.<br>
+                • Always keep fresh water available.<br>
+                • Store in a cool, dry place, tightly closed.</p>
+            </div>
+            <p style='color:#aaa'>Full feeding charts are on each product page.</p>");
+    }
+
+    /** 2-week check-in — sent 14 days after delivery. */
+    public static function checkInTemplate(string $name): string
+    {
+        return self::shell("
+            <p>Hi $name,</p>
+            <p>It's been a couple of weeks — how is your companion getting on with the new products? 🐶🐱</p>
+            <p>If anything isn't quite right, just reply to this email and our team will help you sort it out.</p>
+            <p style='color:#aaa'>We're always here for you and your pet.</p>");
+    }
+
+    /** Review request (carries the referral code) — sent 20 days after delivery. */
+    public static function reviewRequestTemplate(string $name, ?string $referralCode = null): string
+    {
+        $url = self::storeUrl();
+        $ref = $referralCode ? "
+            <div style='margin-top:18px;padding:14px 16px;background:#15151c;border-radius:10px'>
+                <b style='color:#bf924d'>Share the love & earn</b>
+                <p style='margin:8px 0 0;color:#ddd'>Refer a friend with your code
+                <b style='color:#bf924d;letter-spacing:2px'>$referralCode</b> — they get a warm welcome and you get rewarded.</p>
+            </div>" : '';
+        return self::shell("
+            <p>Hi $name,</p>
+            <p>Loving your recent order? A quick <b>review</b> helps other pet parents shop with confidence —
+            and only takes a minute ⭐</p>
+            " . self::button('Write a review', $url . '/orders') . "
+            $ref");
+    }
+
+    /** Reorder reminder — sent ~27 days after delivery. */
+    public static function reorderReminderTemplate(string $name): string
+    {
+        $url = self::storeUrl();
+        return self::shell("
+            <p>Hi $name,</p>
+            <p>Running low? 🐾 Most of our favourites last about a month — now's a great time to
+            <b>restock</b> so your companion never misses a meal.</p>
+            <p style='color:#aaa'>Reorder in one tap from your order history.</p>
+            " . self::button('Reorder now', $url . '/orders'));
+    }
+
     public static function resetTemplate(string $name, string $link): string
     {
         $brand = self::brand();

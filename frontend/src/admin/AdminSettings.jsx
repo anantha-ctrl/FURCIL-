@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Store, Mail, Megaphone, Share2, Sparkles, Image as ImageIcon, Upload, Receipt, QrCode } from 'lucide-react';
+import { Save, Store, Mail, Megaphone, Share2, Sparkles, Image as ImageIcon, Upload, Receipt, QrCode, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/client';
 import { Spinner } from '../components/ui';
@@ -7,11 +7,11 @@ import { Spinner } from '../components/ui';
 // [key, label, placeholder, type]
 const SECTIONS = [
   ['Brand', Store, [
-    ['store_name', 'Store name', 'Novo Clothing', 'text'],
+    ['store_name', 'Store name', 'FURCIL', 'text'],
     ['store_logo', 'Store logo', 'Transparent PNG · wide ~240×80 · shown in header, footer & admin', 'image'],
   ]],
   ['Contact (shown on Contact page)', Mail, [
-    ['store_contact_email', 'Contact email', 'support@cloudfashion.com', 'email'],
+    ['store_contact_email', 'Contact email', 'support@furcil.com', 'email'],
     ['store_contact_phone', 'Contact phone', '+91 98765 43210', 'text'],
     ['store_address', 'Studio / address', 'Bengaluru, India', 'text'],
     ['store_contact_to', 'Message inbox (Contact Us emails delivered here)', 'you@gmail.com', 'email'],
@@ -28,30 +28,34 @@ const SECTIONS = [
     ['store_whatsapp', 'WhatsApp number (intl, no +)', '919876543210', 'text'],
   ]],
   ['Homepage — landing hero & story', Sparkles, [
-    ['landing_hero_eyebrow', 'Hero eyebrow (small label)', 'Novo Clothing — Est. Elegance', 'text'],
-    ['landing_hero_title', 'Hero headline — line 1', "We don't sell clothes.", 'text'],
+    ['landing_hero_eyebrow', 'Hero eyebrow (small label)', 'FURCIL — Est. Elegance', 'text'],
+    ['landing_hero_title', 'Hero headline — line 1', 'Everything your pet needs.', 'text'],
     ['landing_hero_accent', 'Hero headline — line 2 (gold)', 'We create confidence.', 'text'],
-    ['landing_hero_subtitle', 'Hero subtitle', 'Editorial fashion, crafted in India…', 'textarea'],
+    ['landing_hero_subtitle', 'Hero subtitle', 'Nutrition, comfort and play for every pet…', 'textarea'],
     ['landing_hero_cta', 'Hero button text', 'Explore Collection', 'text'],
     ['landing_hero_cta_link', 'Hero button link', '/shop', 'text'],
-    ['landing_story_quote', 'Brand-story quote', 'Our mission is not to sell clothes…', 'textarea'],
+    ['landing_story_quote', 'Brand-story quote', 'Happier, healthier pets and the people who love them…', 'textarea'],
   ]],
   ['Homepage — images (upload or paste URL; empty = default)', ImageIcon, [
     ['landing_img_hero', 'Hero background image', 'Landscape 16:9 · 1920×1080 · keep subject centred', 'image'],
     ['landing_img_intro', 'Brand-intro image', 'Portrait 4:5 · 1000×1250', 'image'],
-    ['landing_img_men', 'Men collection image', 'Portrait 4:5 · 1000×1250', 'image'],
+    ['landing_img_men', 'Featured collection image (Dogs block)', 'Portrait 4:5 · 1000×1250', 'image'],
     ['landing_img_newarrival', 'New-arrival banner image', 'Landscape 16:9 · 1920×1080 · keep subject centred', 'image'],
+  ]],
+  ['Orders & payment rules', CreditCard, [
+    ['order_prefix', 'Order number prefix', 'FUR', 'text'],
+    ['cod_max_amount', 'COD available up to (₹) — above this, online payment only', '1000', 'number'],
   ]],
   ['Billing / POS (in-store invoice)', Receipt, [
     ['billing_tax_pct', 'Default tax / GST (%)', '0', 'number'],
     ['billing_invoice_prefix', 'Invoice number prefix', 'INV', 'text'],
-    ['billing_footer_note', 'Invoice footer note', 'Thank you for shopping with Novo Clothing!', 'text'],
+    ['billing_footer_note', 'Invoice footer note', 'Thank you for shopping with FURCIL!', 'text'],
   ]],
   ['Online payment — UPI / QR (customers pay & upload proof; you approve)', QrCode, [
-    ['upi_id', 'UPI ID (leave empty to disable online payment)', 'novoclothing@okaxis', 'text'],
-    ['upi_payee_name', 'Payee name shown to customer', 'Novo Clothing', 'text'],
+    ['upi_id', 'UPI ID (leave empty to disable online payment)', 'furcil@okaxis', 'text'],
+    ['upi_payee_name', 'Payee name shown to customer', 'FURCIL', 'text'],
     ['upi_qr_image', 'Custom QR image (optional — auto-generated with amount if empty)', 'Square · 600×600 · your printed UPI QR', 'image'],
-    ['bank_account_name', 'Bank account holder name (optional)', 'Novo Clothing', 'text'],
+    ['bank_account_name', 'Bank account holder name (optional)', 'FURCIL', 'text'],
     ['bank_account_number', 'Bank account number (optional)', '1234567890', 'text'],
     ['bank_ifsc', 'Bank IFSC (optional)', 'HDFC0001234', 'text'],
     ['bank_name', 'Bank name (optional)', 'HDFC Bank', 'text'],

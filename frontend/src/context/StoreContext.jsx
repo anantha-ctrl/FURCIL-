@@ -4,9 +4,9 @@ import api from '../api/client';
 // Public, store-wide config (announcement bar, socials, contact, shipping…)
 // fetched once at app boot from /api/store-info and shared everywhere.
 const DEFAULTS = {
-  name: 'Novo Clothing',
+  name: 'FURCIL',
   logo: '',
-  email: 'support@cloudfashion.com',
+  email: 'support@furcil.com',
   phone: '+91 98765 43210',
   address: 'Bengaluru, India',
   announcement: '',

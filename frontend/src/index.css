@@ -46,6 +46,36 @@ input:-webkit-autofill:active {
   transition: background-color 9999s ease-in-out 0s;
 }
 
+/* ── Themed native <select> dropdowns ──
+   Replaces the OS look (blue highlight, default arrow) with a brand-styled one:
+   a gold chevron, themed option list, and a gold highlight on the active option. */
+select.input {
+  accent-color: #bf924d;                 /* gold highlight in the open option list */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23bf924d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 1.05rem;
+  padding-right: 2.6rem;
+}
+select.input option {
+  background-color: #ffffff;
+  color: #1c3025;                        /* forest ink */
+  padding: 10px;
+  font-weight: 500;
+}
+html.dark select.input option {
+  background-color: #1c3025;             /* forest green panel */
+  color: #f3f4f6;
+}
+select.input option:checked,
+select.input option:hover {
+  background: #bf924d;                    /* gold */
+  color: #1c3025;
+}
+
 /* Hide scrollbar on horizontal rails (landing featured collections) */
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
@@ -85,8 +115,8 @@ input:-webkit-autofill:active {
   transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
 }
 .card-glow:hover {
-  box-shadow: 0 0 24px rgba(201, 169, 106, 0.15), 0 8px 32px rgba(0,0,0,0.12);
-  border-color: rgba(201, 169, 106, 0.3);
+  box-shadow: 0 0 24px rgba(191, 146, 77, 0.15), 0 8px 32px rgba(0,0,0,0.12);
+  border-color: rgba(191, 146, 77, 0.3);
   transform: translateY(-2px);
 }
 
@@ -102,15 +132,15 @@ input:-webkit-autofill:active {
   bottom: 6px;
   width: 3px;
   border-radius: 0 4px 4px 0;
-  background: linear-gradient(180deg, #c9a96a, #e3cfa3);
-  box-shadow: 0 0 8px rgba(201, 169, 106, 0.4);
+  background: linear-gradient(180deg, #bf924d, #d9b878);
+  box-shadow: 0 0 8px rgba(191, 146, 77, 0.4);
 }
 
 /* Gradient icon background for KPI cards */
 .icon-gradient-emerald { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05)); }
 .icon-gradient-blue    { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05)); }
 .icon-gradient-indigo  { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(99,102,241,0.05)); }
-.icon-gradient-gold    { background: linear-gradient(135deg, rgba(201,169,106,0.2), rgba(201,169,106,0.05)); }
+.icon-gradient-gold    { background: linear-gradient(135deg, rgba(191,146,77,0.2), rgba(191,146,77,0.05)); }
 .icon-gradient-amber   { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05)); }
 .icon-gradient-cyan    { background: linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.05)); }
 .icon-gradient-rose    { background: linear-gradient(135deg, rgba(244,63,94,0.15), rgba(244,63,94,0.05)); }

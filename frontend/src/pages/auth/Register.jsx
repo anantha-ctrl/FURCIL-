@@ -28,7 +28,7 @@ export default function Register() {
   };
 
   return (
-    <AuthShell title="Create account" subtitle="Join Novo Clothing for exclusive drops"
+    <AuthShell title="Create account" subtitle="Join FURCIL for exclusive pet-care offers"
       footer={<>Already have an account? <Link to="/login" className="font-semibold text-gold">Sign in</Link></>}>
       <form onSubmit={submit} className="space-y-4">
         <input required className="input" placeholder="Full name" value={form.name}

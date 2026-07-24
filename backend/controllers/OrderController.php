@@ -61,11 +61,21 @@ class OrderController
         Response::success($order);
     }
 
+    /** Threshold rule: orders up to this amount are COD-only; above it are online-only. */
+    public static function codMax(): float
+    {
+        return (float) Setting::get('cod_max_amount', 1000);
+    }
+
     /** Place a Cash-on-Delivery order directly. */
     public function placeCod(array $p): void
     {
         $userId = Auth::id();
         $built = self::buildOrderData($userId, Request::body());
+        // COD is only allowed up to the threshold; bigger carts must pay online.
+        if ((float) $built['total'] > self::codMax()) {
+            Response::error('Cash on Delivery is available only for orders up to ' . self::codMax() . '. Please pay online.', 422);
+        }
         $orderId = self::persistOrder($userId, $built, 'cod', 'pending');
         self::finalizeOrder($userId, $orderId, $built);
         Response::success(['order_id' => $orderId, 'order_number' => $built['order_number']], 'Order placed (COD)', 201);
@@ -306,7 +316,7 @@ class OrderController
         $db = db();
         $stmt = $db->prepare(
             'SELECT ct.quantity, ct.variant_id, p.id AS product_id, p.name, p.price, p.stock,
-                    pv.size, pv.color, pv.price_diff, pv.stock AS variant_stock,
+                    pv.size, pv.color, pv.price_diff, pv.price AS variant_price, pv.stock AS variant_stock,
                     (SELECT image_url FROM product_images WHERE product_id=p.id ORDER BY is_primary DESC LIMIT 1) AS image
              FROM cart ct JOIN products p ON p.id=ct.product_id
              LEFT JOIN product_variants pv ON pv.id=ct.variant_id
@@ -325,7 +335,9 @@ class OrderController
             if ((int) $c['quantity'] > $available) {
                 Response::error("Insufficient stock for {$c['name']}", 400);
             }
-            $price = (float) $c['price'] + (float) ($c['price_diff'] ?? 0);
+            $price = ($c['variant_price'] !== null)
+                ? (float) $c['variant_price']
+                : (float) $c['price'] + (float) ($c['price_diff'] ?? 0);
             $line = $price * (int) $c['quantity'];
             $subtotal += $line;
             $items[] = [
@@ -374,7 +386,7 @@ class OrderController
         $total = round($subtotal - $discount - $pointsValue + $shipping, 2);
 
         return [
-            'order_number'  => 'CF' . date('ymd') . strtoupper(substr(uniqid(), -6)),
+            'order_number'  => '', // assigned sequentially inside persistOrder() (e.g. FUR00001)
             'items'         => $items,
             'subtotal'      => round($subtotal, 2),
             'discount'      => $discount,
@@ -388,24 +400,50 @@ class OrderController
         ];
     }
 
-    /** Inserts the order + items atomically, returns order id. */
-    public static function persistOrder(int $userId, array $d, string $method, string $paymentStatus, ?string $rzpOrderId = null): int
+    /**
+     * Next sequential, human-friendly order number — FUR00001, FUR00002, …
+     * Prefix is admin-configurable via the `order_prefix` setting (default FUR).
+     * Must be called inside the order transaction (uses FOR UPDATE to stay race-safe).
+     */
+    private static function nextOrderNumber(PDO $db): string
+    {
+        $prefix = preg_replace('/[^A-Za-z0-9]/', '', (string) Setting::get('order_prefix', 'FUR')) ?: 'FUR';
+        $stmt = $db->prepare(
+            "SELECT order_number FROM orders
+             WHERE order_number LIKE ? AND order_number NOT LIKE 'TEMP_%'
+             ORDER BY id DESC LIMIT 1 FOR UPDATE"
+        );
+        $stmt->execute([$prefix . '%']);
+        $last = $stmt->fetchColumn();
+        $next = $last ? ((int) preg_replace('/[^0-9]/', '', $last)) + 1 : 1;
+        return $prefix . str_pad((string) $next, 5, '0', STR_PAD_LEFT);
+    }
+
+    /** Inserts the order + items atomically, returns order id. Fills $d['order_number']. */
+    public static function persistOrder(int $userId, array &$d, string $method, string $paymentStatus, ?string $rzpOrderId = null): int
     {
         $db = db();
         $db->beginTransaction();
         try {
+            // Insert with a temporary unique number, then assign the sequential one
+            // (so the FOR UPDATE lookup can't collide with this same row).
+            $temp = 'TEMP_' . uniqid('', true);
             $db->prepare(
                 'INSERT INTO orders
                  (order_number, user_id, address_id, shipping_address, subtotal, discount, shipping_fee, total,
                   points_used, points_earned, coupon_code, payment_method, payment_status, razorpay_order_id, status)
                  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
             )->execute([
-                $d['order_number'], $userId, $d['address_id'] ?? null, json_encode($d['address']),
+                $temp, $userId, $d['address_id'] ?? null, json_encode($d['address']),
                 $d['subtotal'], $d['discount'], $d['shipping_fee'], $d['total'],
                 $d['points_used'] ?? 0, $d['points_earned'] ?? 0,
                 $d['coupon_code'], $method, $paymentStatus, $rzpOrderId, 'pending',
             ]);
             $orderId = (int) $db->lastInsertId();
+
+            $orderNumber = self::nextOrderNumber($db);
+            $db->prepare('UPDATE orders SET order_number=? WHERE id=?')->execute([$orderNumber, $orderId]);
+            $d['order_number'] = $orderNumber; // propagate back to the caller (emails, response)
 
             $ins = $db->prepare(
                 'INSERT INTO order_items
@@ -465,6 +503,7 @@ class OrderController
                 Mailer::brand() . ' · Order ' . $d['order_number'] . ' confirmed',
                 Mailer::orderPlacedTemplate($user['name'], $d['order_number'], (float) $d['total'])
             );
+            Automation::logSent('order_confirmation', $orderId, $userId, $user['email']);
         }
     }
 
@@ -514,6 +553,7 @@ class OrderController
                 Mailer::brand() . ' · Order ' . $order['order_number'] . ' confirmed',
                 Mailer::orderPlacedTemplate($user['name'], $order['order_number'], (float) $order['total'])
             );
+            Automation::logSent('order_confirmation', $orderId, $uid, $user['email']);
         }
     }
 

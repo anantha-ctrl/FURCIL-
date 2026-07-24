@@ -51,8 +51,8 @@ export default function AdminBanners() {
 
       {show && (
         <form onSubmit={save} className="card grid gap-4 p-6 sm:grid-cols-2">
-          <input required className="input" placeholder="Title (e.g. Summer Couture)" value={form.title} onChange={(e) => set('title', e.target.value)} />
-          <input className="input" placeholder="Subtitle (e.g. New Season Arrivals)" value={form.subtitle || ''} onChange={(e) => set('subtitle', e.target.value)} />
+          <input required className="input" placeholder="Title (e.g. Nutrition They’ll Love)" value={form.title} onChange={(e) => set('title', e.target.value)} />
+          <input className="input" placeholder="Subtitle (e.g. Premium food & treats)" value={form.subtitle || ''} onChange={(e) => set('subtitle', e.target.value)} />
           <input className="input" placeholder="Button label (e.g. Shop Men)" value={form.cta_label || ''} onChange={(e) => set('cta_label', e.target.value)} />
           <input className="input" placeholder="Button link (e.g. /category/men)" value={form.cta_link || ''} onChange={(e) => set('cta_link', e.target.value)} />
           <input className="input sm:col-span-2" placeholder="Image URL" value={typeof form.image_url === 'string' && !form.image_url.startsWith('data:') ? form.image_url : ''} onChange={(e) => set('image_url', e.target.value)} />

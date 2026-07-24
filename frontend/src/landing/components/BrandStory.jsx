@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { MaskReveal } from '../lib/Reveal';
 
-const DEFAULT_QUOTE = 'Our mission is not to sell clothes. We build confidence through fashion.';
+const DEFAULT_QUOTE = 'Our mission is simple — happier, healthier pets and the people who love them.';
 
 function Word({ word, progress, start, end }) {
   const opacity = useTransform(progress, [start, end], [0.15, 1]);
@@ -25,7 +25,7 @@ export default function BrandStory({ quote }) {
           transition={{ duration: 0.7 }}
           className="mb-10 text-xs uppercase tracking-[0.5em] text-luxe-bronze"
         >
-          The Novo Clothing Story
+          The FURCIL Story
         </motion.p>
 
         {/* word-by-word fill on scroll */}
@@ -41,7 +41,7 @@ export default function BrandStory({ quote }) {
           className="mx-auto mt-12 h-px w-24 bg-gold-sheen"
         />
         <MaskReveal
-          lines={['— Crafted with intention, worn with pride.']}
+          lines={['— Chosen with care, loved every day.']}
           className="mt-8 block text-sm uppercase tracking-[0.3em] text-luxe-ink/50 dark:text-white/50"
         />
       </div>

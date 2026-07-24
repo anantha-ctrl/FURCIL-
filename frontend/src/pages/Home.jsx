@@ -10,12 +10,12 @@ import RecentlyViewed from '../components/RecentlyViewed';
 import OffersStrip from '../components/OffersStrip';
 
 const SLIDES = [
-  { title: 'Sharp & Tailored', subtitle: 'The Menswear Edit', cta: 'Shop Men', to: '/category/men',
-    img: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?w=1600' },
-  { title: 'Everyday Essentials', subtitle: 'The T-Shirt Edit', cta: 'Shop T-Shirts', to: '/category/t-shirts',
-    img: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=1600' },
-  { title: 'Elevated Staples', subtitle: 'New Season Arrivals', cta: 'Shop New In', to: '/shop?sort=newest',
-    img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600' },
+  { title: 'Nutrition They’ll Love', subtitle: 'For Happy, Healthy Dogs', cta: 'Shop Dogs', to: '/category/dogs',
+    img: 'https://placehold.co/1600x900/e8e2d5/1c3025?text=dog,pet' },
+  { title: 'Purr-fect Picks', subtitle: 'Everything for Cats', cta: 'Shop Cats', to: '/category/cats',
+    img: 'https://placehold.co/1600x900/e8e2d5/1c3025?text=cat,pet' },
+  { title: 'Everything Your Pet Needs', subtitle: 'New Arrivals', cta: 'Shop New In', to: '/shop?sort=newest',
+    img: 'https://placehold.co/1600x900/e8e2d5/1c3025?text=pets' },
 ];
 
 export default function Home() {
@@ -63,7 +63,7 @@ export default function Home() {
               <Sparkles size={16} /> {slides[slide].subtitle}
             </p>
             <h1 className="font-display text-5xl font-bold leading-tight sm:text-7xl">{slides[slide].title}</h1>
-            <p className="mt-4 text-gray-300">Discover handpicked pieces designed to elevate every moment.</p>
+            <p className="mt-4 text-gray-300">Handpicked essentials to keep every companion happy and healthy.</p>
             <Link to={slides[slide].to} className="btn-gold mt-8">{slides[slide].cta} <ArrowRight size={18} /></Link>
           </motion.div>
         </div>
@@ -82,7 +82,7 @@ export default function Home() {
             [Truck, 'Free Shipping', 'On orders over ₹1999'],
             [RefreshCw, 'Easy Returns', '7-day return policy'],
             [ShieldCheck, 'Secure Payments', 'Razorpay protected'],
-            [Sparkles, 'Premium Quality', 'Curated collections'],
+            [Sparkles, 'Premium Quality', 'Curated for pets'],
           ].map(([Icon, t, s]) => (
             <div key={t} className="flex items-center gap-3">
               <div className="rounded-full bg-gold/10 p-3 text-gold"><Icon size={22} /></div>
@@ -101,7 +101,7 @@ export default function Home() {
               className="group relative aspect-[4/5] overflow-hidden rounded-2xl">
               {/* Use the admin-uploaded category image; fall back to a curated
                   placeholder only when the category has no image set. */}
-              <img src={c.image_url || `https://images.unsplash.com/photo-${CAT_IMG[i % CAT_IMG.length]}?w=500`} alt={c.name}
+              <img src={c.image_url || CAT_IMG[i % CAT_IMG.length]} alt={c.name}
                 className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
               <div className="absolute bottom-4 left-4 text-white">
@@ -122,8 +122,8 @@ export default function Home() {
         <div className="relative overflow-hidden rounded-3xl bg-hero-gradient p-10 text-white sm:p-16">
           <div className="relative z-10 max-w-lg">
             <p className="text-sm uppercase tracking-[0.3em] text-gold">Limited Offer</p>
-            <h3 className="mt-2 font-display text-4xl font-bold">Up to 50% Off</h3>
-            <p className="mt-2 text-gray-300">End of season sale on selected styles. Use code <b className="text-gold">FLAT500</b>.</p>
+            <h3 className="mt-2 font-display text-4xl font-bold">Up to 40% Off</h3>
+            <p className="mt-2 text-gray-300">Save big on selected pet products. Use code <b className="text-gold">PAWS500</b>.</p>
             <Link to="/shop?on_sale=1&sort=discount" className="btn-gold mt-6">Shop the Sale <ArrowRight size={18} /></Link>
           </div>
           <Sparkles className="absolute -right-6 -top-6 h-48 w-48 text-gold/10" />
@@ -147,8 +147,13 @@ export default function Home() {
   );
 }
 
-const CAT_IMG = ['1490481651871-ab68de25d43d', '1483985988355-763728e1935b', '1519238263530-99bdd11df2ea',
-  '1542291026-7eec264c27ff', '1524592094714-0f0654e20314'];
+const CAT_IMG = [
+  'https://placehold.co/500x600/e8e2d5/1c3025?text=dog',
+  'https://placehold.co/500x600/e8e2d5/1c3025?text=cat',
+  'https://placehold.co/500x600/e8e2d5/1c3025?text=parrot,bird',
+  'https://placehold.co/500x600/e8e2d5/1c3025?text=aquarium,fish',
+  'https://placehold.co/500x600/e8e2d5/1c3025?text=rabbit,hamster',
+];
 
 function Carousel({ title, eyebrow, products, to }) {
   return (

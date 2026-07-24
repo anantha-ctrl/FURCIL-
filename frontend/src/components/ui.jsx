@@ -26,7 +26,7 @@ export const Spinner = ({ className = '' }) => (
       {/* spinning gold ring */}
       <span className="absolute inset-0 animate-spin rounded-full border-2 border-gold/25 border-t-gold" />
       {/* brand logo, gently pulsing */}
-      <img src="/logo.png" alt="Loading" className="h-7 w-7 animate-pulse object-contain dark:invert" />
+      <img src="/Images/IMG_20260609_151932_622.webp" alt="Loading" className="h-9 w-9 animate-pulse rounded-full object-contain" />
     </div>
   </div>
 );

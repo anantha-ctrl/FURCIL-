@@ -31,7 +31,7 @@ export default function BestSeller() {
             <h2 className="font-display text-4xl font-bold text-luxe-ink dark:text-white sm:text-5xl">Best sellers</h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mx-auto mt-4 max-w-xl text-luxe-ink/60 dark:text-white/60">The pieces our community keeps coming back for — chosen, worn and loved.</p>
+            <p className="mx-auto mt-4 max-w-xl text-luxe-ink/60 dark:text-white/60">The products our community keeps coming back for — trusted, tried and loved.</p>
           </Reveal>
         </div>
 

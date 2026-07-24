@@ -63,7 +63,7 @@ export default function AdminBilling() {
   useEffect(() => {
     api.get('/api/admin/billing/config')
       .then((r) => { setConfig(r.data.data); setTaxPct(String(r.data.data.tax_pct ?? 0)); })
-      .catch(() => setConfig({ store_name: 'Novo Clothing', tax_pct: 0 }));
+      .catch(() => setConfig({ store_name: 'FURCIL', tax_pct: 0 }));
     loadHistory();
   }, []);
 
@@ -599,7 +599,7 @@ function InvoiceModal({ bill, config, onClose }) {
       </style></head><body onload="setTimeout(function(){window.print()},60)">
       <div class="center">
         <img class="logo" src="${logoSrc}" alt="" onerror="this.style.display='none'" />
-        <div class="brand">${escapeHtml(config.store_name || 'Novo Clothing')}</div>
+        <div class="brand">${escapeHtml(config.store_name || 'FURCIL')}</div>
         ${config.address ? `<div class="muted">${escapeHtml(config.address)}</div>` : ''}
         ${config.phone ? `<div class="muted">Ph: ${escapeHtml(config.phone)}</div>` : ''}
         ${config.email ? `<div class="muted">${escapeHtml(config.email)}</div>` : ''}

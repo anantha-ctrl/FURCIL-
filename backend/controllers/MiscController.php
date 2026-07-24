@@ -160,6 +160,8 @@ class MiscController
         $upiId = Setting::get('upi_id', '');
         Response::success([
             'upi_enabled'    => $upiId !== '',
+            // Payment rule: orders up to this amount are COD-only; above it, online-only.
+            'cod_max_amount' => (float) Setting::get('cod_max_amount', 1000),
             'upi_id'         => $upiId,
             'payee_name'     => Setting::get('upi_payee_name', '') ?: Setting::get('store_name', 'Novo Clothing'),
             'qr_image'       => Setting::get('upi_qr_image', ''),

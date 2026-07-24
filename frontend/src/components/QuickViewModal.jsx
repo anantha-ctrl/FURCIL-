@@ -30,6 +30,16 @@ export default function QuickViewModal({ slug, onClose }) {
   );
   const inStock = (variant?.stock ?? product?.stock ?? 0) > 0;
 
+  // Live price for the selected size/variant: prefer its absolute price,
+  // else fall back to base + legacy price_diff, else the base price.
+  const displayPrice = variant?.price != null
+    ? Number(variant.price)
+    : Number(product?.price || 0) + Number(variant?.price_diff || 0);
+  const displayMrp = variant?.mrp != null ? Number(variant.mrp) : Number(product?.mrp || 0);
+  const displayDiscount = displayMrp > displayPrice
+    ? Math.round(((displayMrp - displayPrice) / displayMrp) * 100)
+    : 0;
+
   const addToCart = () => {
     if (product.sizes.length && !size) return toast.error('Please select a size');
     if (product.colors.length && !color) return toast.error('Please select a color');
@@ -76,9 +86,9 @@ export default function QuickViewModal({ slug, onClose }) {
                 <span className="text-gray-400">({product.rating_count})</span>
               </div>
               <div className="mt-3 flex items-end gap-2">
-                <span className="text-2xl font-bold">{inr(product.price)}</span>
-                {product.mrp > product.price && <span className="text-gray-400 line-through">{inr(product.mrp)}</span>}
-                {product.discount_pct > 0 && <span className="rounded bg-gold/15 px-2 py-0.5 text-sm font-semibold text-gold">{product.discount_pct}% OFF</span>}
+                <span className="text-2xl font-bold">{inr(displayPrice)}</span>
+                {displayMrp > displayPrice && <span className="text-gray-400 line-through">{inr(displayMrp)}</span>}
+                {displayDiscount > 0 && <span className="rounded bg-gold/15 px-2 py-0.5 text-sm font-semibold text-gold">{displayDiscount}% OFF</span>}
               </div>
               <p className="mt-3 line-clamp-3 text-sm text-gray-500 dark:text-gray-300">{product.description}</p>
 

@@ -62,7 +62,7 @@ export default function Login() {
   };
 
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to continue your style journey"
+    <AuthShell title="Welcome back" subtitle="Sign in to continue caring for your pets"
       footer={<>Don't have an account? <Link to="/register" className="font-semibold text-gold">Create one</Link></>}>
       <form onSubmit={submit} className="space-y-4">
         <div className="relative">
@@ -95,7 +95,7 @@ export default function Login() {
       </button>
 
       <p className="mt-4 rounded-xl bg-gold/5 p-3 text-center text-xs text-gray-400">
-        Demo — Admin: admin@novaclothing.com / Admin@123 · Customer: customer@novaclothing.com / Test@123
+        Demo — Admin: admin@furcil.com / Admin@123 · Customer: customer@furcil.com / Test@123
       </p>
     </AuthShell>
   );

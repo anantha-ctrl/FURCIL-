@@ -34,9 +34,12 @@ class AdminCategoryController
             Response::error('Validation failed', 422, $v->errors());
         }
         $slug = self::uniqueCategorySlug($data['name']);
+        // parent_id arrives as '' from the "Top-level (no parent)" option — coerce
+        // any empty value to NULL so the BIGINT column doesn't reject it (strict mode).
+        $parentId = !empty($data['parent_id']) ? (int) $data['parent_id'] : null;
         db()->prepare('INSERT INTO categories (name, slug, parent_id, image_url, description, is_active) VALUES (?,?,?,?,?,?)')
             ->execute([
-                $data['name'], $slug, $data['parent_id'] ?? null,
+                $data['name'], $slug, $parentId,
                 $data['image_url'] ?? null, $data['description'] ?? null,
                 isset($data['is_active']) ? (int) $data['is_active'] : 1,
             ]);

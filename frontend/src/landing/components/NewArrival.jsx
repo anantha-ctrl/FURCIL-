@@ -34,7 +34,7 @@ export default function NewArrival({ image }) {
           transition={{ delay: 0.25, duration: 0.7 }}
           className="mt-6 max-w-lg text-lg text-white/75"
         >
-          Fresh silhouettes, seasonal fabrics and limited runs. First come, forever styled.
+          Fresh arrivals across food, toys, grooming and habitats. New picks your pet will love.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}

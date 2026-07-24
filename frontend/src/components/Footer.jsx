@@ -36,7 +36,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Logo white className="h-14" />
-          <p className="mt-4 text-sm text-gray-400">Premium fashion, curated for the modern wardrobe. Timeless pieces, crafted with care.</p>
+          <p className="mt-4 text-sm text-gray-400">Premium pet care, curated for every companion. Nutrition, comfort and play, chosen with care.</p>
           <div className="mt-5 flex gap-3">
             {SOCIALS.map(({ Icon, label, url }) => (
               <a key={label} href={url} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}

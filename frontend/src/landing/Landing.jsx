@@ -41,15 +41,15 @@ export default function Landing() {
         <BrandIntro image={content?.intro_image} />
         <CategorySection />
 
-        {/* Men — the store is a men-only collection */}
+        {/* Dogs — featured collection block */}
         <CollectionShowcase
           index="01"
-          eyebrow="Men"
-          title={['Sharp.', 'Effortless.']}
-          description="Tailored essentials and elevated staples — built for the man who lets the fit do the talking."
+          eyebrow="Dogs"
+          title={['Happy.', 'Healthy.']}
+          description="Complete nutrition, cozy beds and walk-ready gear — everything to keep your best friend thriving."
           image={content?.men_image || IMG.men}
-          to="/category/men"
-          cta="Explore Men"
+          to="/category/dogs"
+          cta="Explore Dogs"
         />
 
         <BestSeller />

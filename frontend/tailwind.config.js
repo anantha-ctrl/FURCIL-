@@ -5,23 +5,32 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Brand palette derived from the FURCIL logo
         gold: {
-          DEFAULT: '#c9a96a',
-          light: '#e3cfa3',
-          dark: '#a3854a',
+          DEFAULT: '#bf924d',  // logo gold ring / leaf
+          light: '#d9b878',
+          dark: '#8a6531',
         },
+        // `ink` is the primary dark/brand colour — the logo's forest green
         ink: {
-          DEFAULT: '#0b0b0f',
-          soft: '#15151c',
-          line: '#23232e',
+          DEFAULT: '#1c3025',  // logo forest-green field
+          soft: '#264234',
+          line: '#33513f',
         },
+        forest: {
+          DEFAULT: '#1c3025',
+          light: '#264234',
+          deep: '#132219',
+        },
+        sage: '#939f7d',       // logo wave
+        cream: '#f9f0e3',      // logo letterform
         // Luxury landing palette (editorial / light theme)
         luxe: {
-          bg: '#F8F6F2',      // warm off-white background
-          ink: '#111111',     // primary text
-          gold: '#D4AF37',    // accent
-          bronze: '#8C6A43',  // secondary
-          line: '#E7E1D8',    // hairline dividers
+          bg: '#f7efe9',      // logo paper backdrop
+          ink: '#1c3025',     // primary text = forest green
+          gold: '#bf924d',    // accent = logo gold
+          bronze: '#8a6531',  // secondary
+          line: '#e7e1d8',    // hairline dividers
         },
       },
       fontFamily: {
@@ -30,7 +39,7 @@ export default {
       },
       boxShadow: {
         glass: '0 8px 32px rgba(0,0,0,0.18)',
-        glow: '0 0 30px rgba(201,169,106,0.25)',
+        glow: '0 0 30px rgba(191,146,77,0.30)',
         luxe: '0 24px 60px -20px rgba(17,17,17,0.22)',
         'luxe-sm': '0 12px 30px -12px rgba(17,17,17,0.18)',
       },
@@ -39,8 +48,8 @@ export default {
         'luxe-lg': '30px',
       },
       backgroundImage: {
-        'hero-gradient': 'linear-gradient(120deg,#0b0b0f 0%,#1a1320 60%,#2a1f14 100%)',
-        'gold-sheen': 'linear-gradient(120deg,#D4AF37 0%,#f0dc9a 45%,#8C6A43 100%)',
+        'hero-gradient': 'linear-gradient(120deg,#132219 0%,#1c3025 55%,#264234 100%)',
+        'gold-sheen': 'linear-gradient(120deg,#bf924d 0%,#d9b878 45%,#8a6531 100%)',
       },
       keyframes: {
         float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },

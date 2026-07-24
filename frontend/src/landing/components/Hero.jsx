@@ -9,11 +9,11 @@ import api from '../../api/client';
 const EASE = [0.22, 1, 0.36, 1];
 
 const DEFAULTS = {
-  hero_eyebrow: 'Novo Clothing — Est. Elegance',
-  hero_title: "We don't sell clothes.",
-  hero_accent: 'We create confidence.',
-  hero_subtitle: 'Editorial fashion, crafted in India — designed to make every moment feel like a statement.',
-  hero_cta: 'Explore Collection',
+  hero_eyebrow: 'FURCIL — Pet Care, Perfected',
+  hero_title: 'Everything your pet needs.',
+  hero_accent: 'We care for every companion.',
+  hero_subtitle: 'Nutrition, comfort and play for dogs, cats, birds, fish & small pets — delivered across India.',
+  hero_cta: 'Shop Pet Essentials',
   hero_cta_link: '/shop',
 };
 
@@ -64,7 +64,7 @@ function HeroCarousel({ slides, fallbackEyebrow }) {
     <section
       onMouseEnter={() => { hover.current = true; }}
       onMouseLeave={() => { hover.current = false; }}
-      className="relative flex h-[100svh] min-h-[620px] items-center justify-center overflow-hidden bg-luxe-ink"
+      className="relative flex h-[100svh] min-h-[620px] items-center justify-center overflow-hidden bg-[#fbf3e8] dark:bg-[#fbf3e8]"
       style={{ perspective: '1900px' }}
     >
       {/* ambient glow */}
@@ -207,7 +207,7 @@ function EditorialHero({ c }) {
   };
 
   return (
-    <section ref={ref} onMouseMove={onMove} className="relative h-[100svh] min-h-[620px] overflow-hidden bg-luxe-ink">
+    <section ref={ref} onMouseMove={onMove} className="relative h-[100svh] min-h-[620px] overflow-hidden bg-[#fbf3e8] dark:bg-[#fbf3e8]">
       <motion.div style={{ y: imgY, scale: imgScale }} className="absolute inset-0">
         <img src={c.hero_image || IMG.hero} alt="" className="h-full w-full object-cover object-[center_30%]" />
         <div className="absolute inset-0 bg-black/35" />
@@ -255,11 +255,11 @@ function EditorialHero({ c }) {
               <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
             </MagneticButton>
             <MagneticButton
-              to="/category/men"
+              to="/category/dogs"
               strength={0.25}
               className="rounded-full border border-white/40 px-8 py-4 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
             >
-              New Season
+              Shop Dogs
             </MagneticButton>
           </motion.div>
         </div>

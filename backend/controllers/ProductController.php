@@ -207,7 +207,7 @@ class ProductController
         $imgs->execute([$product['id']]);
         $product['images'] = $imgs->fetchAll();
 
-        $vars = $db->prepare('SELECT id, size, color, color_hex, price_diff, stock FROM product_variants WHERE product_id=?');
+        $vars = $db->prepare('SELECT id, size, color, color_hex, price, mrp, price_diff, stock FROM product_variants WHERE product_id=?');
         $vars->execute([$product['id']]);
         $product['variants'] = $vars->fetchAll();
         $product['sizes']  = array_values(array_unique(array_filter(array_column($product['variants'], 'size'))));

@@ -12,7 +12,7 @@ const fmt = (d) => d.toISOString().slice(0, 10);
 const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return d; };
 
 // Tooltip styling — dark panel with light, readable text in both themes.
-const TOOLTIP = { background: '#15151c', border: '1px solid #c9a96a44', borderRadius: 12 };
+const TOOLTIP = { background: '#264234', border: '1px solid #bf924d44', borderRadius: 12 };
 const LABEL = { color: '#ffffff', fontWeight: 600, marginBottom: 2 };
 const ITEM = { color: '#e7d8b6' };
 
@@ -20,7 +20,7 @@ const STATUS_COLORS = {
   pending: '#f59e0b', processing: '#3b82f6', packed: '#6366f1',
   shipped: '#06b6d4', delivered: '#10b981', cancelled: '#f43f5e',
 };
-const CAT_COLORS = ['#c9a96a', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+const CAT_COLORS = ['#bf924d', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
 
 const PRESETS = [
   ['7d', 'Last 7 days', () => [fmt(daysAgo(6)), fmt(new Date())]],
@@ -129,7 +129,7 @@ export default function AdminReports() {
                 <XAxis dataKey="day" stroke="#888" fontSize={11} />
                 <YAxis stroke="#888" fontSize={12} />
                 <Tooltip contentStyle={TOOLTIP} labelStyle={LABEL} itemStyle={ITEM} formatter={(v) => inr(v)} />
-                <Line type="monotone" dataKey="revenue" stroke="#c9a96a" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="revenue" stroke="#bf924d" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -143,9 +143,9 @@ export default function AdminReports() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
                     <XAxis dataKey="status" stroke="#888" fontSize={11} />
                     <YAxis stroke="#888" fontSize={12} allowDecimals={false} />
-                    <Tooltip cursor={{ fill: '#c9a96a18' }} contentStyle={TOOLTIP} labelStyle={LABEL} itemStyle={ITEM} />
+                    <Tooltip cursor={{ fill: '#bf924d18' }} contentStyle={TOOLTIP} labelStyle={LABEL} itemStyle={ITEM} />
                     <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                      {sales.status_breakdown.map((s, i) => <Cell key={i} fill={STATUS_COLORS[s.status] || '#c9a96a'} />)}
+                      {sales.status_breakdown.map((s, i) => <Cell key={i} fill={STATUS_COLORS[s.status] || '#bf924d'} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -160,7 +160,7 @@ export default function AdminReports() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
                     <XAxis type="number" stroke="#888" fontSize={11} tickFormatter={(v) => `₹${v}`} />
                     <YAxis type="category" dataKey="category" stroke="#888" fontSize={11} width={80} />
-                    <Tooltip cursor={{ fill: '#c9a96a18' }} contentStyle={TOOLTIP} labelStyle={LABEL} itemStyle={ITEM} formatter={(v) => inr(v)} />
+                    <Tooltip cursor={{ fill: '#bf924d18' }} contentStyle={TOOLTIP} labelStyle={LABEL} itemStyle={ITEM} formatter={(v) => inr(v)} />
                     <Bar dataKey="revenue" radius={[0, 6, 6, 0]}>
                       {sales.category_breakdown.map((_, i) => <Cell key={i} fill={CAT_COLORS[i % CAT_COLORS.length]} />)}
                     </Bar>

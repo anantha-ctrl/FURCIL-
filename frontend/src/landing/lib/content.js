@@ -1,44 +1,45 @@
-// Curated editorial imagery + copy for the landing experience.
-// (Unsplash — luxury fashion photography.)
+// Curated imagery + copy for the landing experience.
+// Real photos: placedog.net (pets) + i.pravatar.cc (avatars) — reliable, no API key.
+// Swap for your own uploads via Admin → Settings.
 
 export const IMG = {
-  hero: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1400&q=80',
-  intro: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1000&q=80',
-  men: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1100&q=80',
-  newArrival: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1600&q=80',
-  story: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
+  hero: 'https://placedog.net/1400/1000?id=1',
+  intro: 'https://placedog.net/1000/1250?id=2',
+  men: 'https://placedog.net/1000/1250?id=7',
+  newArrival: 'https://placedog.net/1600/1000?id=4',
+  story: 'https://placedog.net/1200/1000?id=5',
 };
 
-// Men-only fallback set (used only if /api/categories is unreachable).
+// Fallback set (used only if /api/categories is unreachable).
 export const CATEGORIES = [
-  { name: 'Men', to: '/category/men', img: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?auto=format&fit=crop&w=700&q=80' },
-  { name: 'T-Shirts', to: '/category/t-shirts', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=80' },
-  { name: 'Shirts', to: '/category/men', img: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=700&q=80' },
-  { name: 'Trousers', to: '/category/men', img: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=700&q=80' },
+  { name: 'Dogs', to: '/category/dogs', img: 'https://placedog.net/700/700?id=10' },
+  { name: 'Cats', to: '/category/cats', img: 'https://placehold.co/700x700/e8e2d5/1c3025?text=Cats' },
+  { name: 'Birds', to: '/category/birds', img: 'https://placehold.co/700x700/e8e2d5/1c3025?text=Birds' },
+  { name: 'Fish', to: '/category/fish', img: 'https://placehold.co/700x700/e8e2d5/1c3025?text=Fish' },
 ];
 
 export const SEASONS = [
-  { name: 'Summer', tone: 'Featherlight linens & sun-warmed tones', img: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Winter', tone: 'Cashmere layers & quiet luxury', img: 'https://images.unsplash.com/photo-1483118714900-540cf339fd46?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Monsoon', tone: 'Water-repellent tailoring, city-ready', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Festive', tone: 'Handcrafted embroidery & gold thread', img: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Wedding', tone: 'Couture silhouettes for the big day', img: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=900&q=80' },
+  { name: 'Dogs', tone: 'Food, chews, beds & walk-ready gear', img: 'https://placedog.net/900/900?id=11' },
+  { name: 'Cats', tone: 'Nutrition, litter, scratchers & play', img: 'https://placehold.co/900x900/e8e2d5/1c3025?text=Cats' },
+  { name: 'Birds', tone: 'Fortified feed, cages & perches', img: 'https://placehold.co/900x900/e8e2d5/1c3025?text=Birds' },
+  { name: 'Fish', tone: 'Flakes, tanks, filters & lighting', img: 'https://placehold.co/900x900/e8e2d5/1c3025?text=Fish' },
+  { name: 'Small Pets', tone: 'Hay, habitats & wheels for the little ones', img: 'https://placehold.co/900x900/e8e2d5/1c3025?text=Small+Pets' },
 ];
 
 export const TESTIMONIALS = [
-  { name: 'Aarohi Menon', role: 'Creative Director', quote: 'Novo Clothing feels less like shopping and more like being styled by someone who truly gets me.', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80' },
-  { name: 'Kabir Rao', role: 'Architect', quote: 'The fit, the fabric, the finish — every detail whispers quality. This is how premium should feel.', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80' },
-  { name: 'Meera Nair', role: 'Photographer', quote: 'I get compliments every single time. Timeless pieces that never try too hard.', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80' },
-  { name: 'Dev Sharma', role: 'Entrepreneur', quote: 'Effortless elegance, delivered. The confidence it gives me is worth every rupee.', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80' },
+  { name: 'Aarohi Menon', role: 'Dog Parent', quote: 'FURCIL gets my Labrador exactly what he needs — the food quality and fast delivery are unmatched.', img: 'https://i.pravatar.cc/200?img=45' },
+  { name: 'Kabir Rao', role: 'Cat Parent', quote: 'From litter to toys, everything just works. My cats are happier and my home smells fresh.', img: 'https://i.pravatar.cc/200?img=12' },
+  { name: 'Meera Nair', role: 'Bird Keeper', quote: 'The seed mixes and supplements are genuinely premium. My cockatiels have never looked brighter.', img: 'https://i.pravatar.cc/200?img=32' },
+  { name: 'Dev Sharma', role: 'Aquarist', quote: 'Great gear at fair prices, delivered on time. FURCIL is my one-stop shop for the whole tank.', img: 'https://i.pravatar.cc/200?img=68' },
 ];
 
 export const INSTAGRAM = [
-  'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=500&q=80',
-  'https://images.unsplash.com/photo-1495385794356-15371f348c31?auto=format&fit=crop&w=500&q=80',
-  'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=500&q=80',
-  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=500&q=80',
-  'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?auto=format&fit=crop&w=500&q=80',
-  'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=500&q=80',
-  'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=500&q=80',
-  'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=500&q=80',
+  'https://placedog.net/500/500?id=20',
+  'https://placedog.net/500/500?id=21',
+  'https://placedog.net/500/500?id=22',
+  'https://placedog.net/500/500?id=23',
+  'https://placedog.net/500/500?id=24',
+  'https://placedog.net/500/500?id=25',
+  'https://placedog.net/500/500?id=26',
+  'https://placedog.net/500/500?id=27',
 ];

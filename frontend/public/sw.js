@@ -1,5 +1,5 @@
-/* Novo Clothing service worker — app-shell caching for installability + offline fallback. */
-const CACHE = 'cloudfashion-v1';
+/* FURCIL service worker — app-shell caching for installability + offline fallback. */
+const CACHE = 'furcil-v1';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg'];
 
 self.addEventListener('install', (e) => {

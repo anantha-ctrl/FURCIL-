@@ -1,20 +1,24 @@
 import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Twitter, ArrowUpRight } from 'lucide-react';
+import { Instagram, Facebook, Twitter, MessageCircle, ArrowUpRight } from 'lucide-react';
 import Logo from '../../components/Logo';
+import { useStore } from '../../context/StoreContext';
 
 const COLS = [
-  ['Company', [['About', '/about'], ['Collections', '/shop'], ['New Arrivals', '/shop'], ['Best Sellers', '/shop']]],
+  ['Company', [['About', '/about'], ['Shop All', '/shop'], ['New Arrivals', '/shop'], ['Best Sellers', '/shop']]],
   ['Support', [['Contact', '/contact'], ['Orders', '/orders'], ['Wishlist', '/wishlist'], ['FAQ', '/contact']]],
   ['Policies', [['Privacy', '/privacy'], ['Terms', '/terms'], ['Returns', '/orders'], ['Shipping', '/shop']]],
 ];
 
-const SOCIALS = [
-  [Instagram, 'https://www.instagram.com/n.o.v.o_clothing'],
-  [Facebook, '#'],
-  [Twitter, '#'],
-];
-
 export default function LandingFooter() {
+  const store = useStore();
+  // Live social links from Admin → Settings (only the ones that are filled show).
+  const SOCIALS = [
+    [Instagram, store.instagram],
+    [Facebook, store.facebook],
+    [Twitter, store.twitter],
+    [MessageCircle, store.whatsapp ? `https://wa.me/${store.whatsapp}` : ''],
+  ].filter(([, href]) => href);
+
   return (
     <footer className="bg-luxe-ink text-white">
       <div className="mx-auto max-w-[1400px] px-6 py-20 sm:px-10 lg:px-12">
@@ -23,7 +27,7 @@ export default function LandingFooter() {
           <div>
             <Logo white className="h-12" />
             <p className="mt-6 max-w-xs text-sm leading-relaxed text-white/60">
-              Editorial fashion, crafted in India. We don't sell clothes — we create confidence.
+              Pet care, crafted for India. Nutrition, comfort and play for every companion.
             </p>
             <div className="mt-6 flex gap-3">
               {SOCIALS.map(([Icon, href], i) => (
@@ -53,7 +57,7 @@ export default function LandingFooter() {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-sm text-white/40 sm:flex-row">
-          <p>© {new Date().getFullYear()} Novo Clothing. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} FURCIL. All rights reserved.</p>
           <p>Designed and Developed By <a href="https://cloudhawk.in/">CloudHawk</a>.</p>
         </div>
       </div>

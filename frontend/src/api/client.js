@@ -3,11 +3,11 @@ import axios from 'axios';
 // Resolve the API base URL:
 //  - In production, set VITE_API_URL at build time to your real API domain.
 //  - Otherwise, follow the host you're browsing from so it works on localhost
-//    AND over the local network (e.g. http://192.168.1.20/CloudFashion/backend
+//    AND over the local network (e.g. http://192.168.1.20/furcil/backend
 //    when you open the site at http://192.168.1.20:5173 from a phone).
 const apiBaseURL =
   import.meta.env.VITE_API_URL ||
-  `${window.location.protocol}//${window.location.hostname}/CloudFashion/backend`;
+  `${window.location.protocol}//${window.location.hostname}/furcil/backend`;
 
 const api = axios.create({
   baseURL: apiBaseURL,

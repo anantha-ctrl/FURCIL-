@@ -29,7 +29,7 @@ export default function ProductCard({ product }) {
       <div className="relative aspect-[3/4] overflow-hidden">
         <Link to={`/product/${product.slug}`}>
           <img
-            src={product.image || 'https://via.placeholder.com/400x533?text=Cloud+Fashion'}
+            src={product.image || 'https://via.placeholder.com/400x533?text=FURCIL'}
             alt={product.name}
             loading="lazy"
             className="h-full w-full object-cover transition duration-700 group-hover:scale-110"

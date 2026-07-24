@@ -80,6 +80,9 @@ $router->post('/api/orders/{id}/reorder','OrderController@reorder');
 $router->post('/api/orders/{id}/return', 'ReturnController@request');
 $router->get('/api/loyalty',             'LoyaltyController@index');
 
+// ---- Cron (token-protected, public) ----
+$router->get('/api/cron/run',            'CronController@run');
+
 // ---- Misc ----
 $router->post('/api/newsletter',         'MiscController@newsletter');
 $router->post('/api/contact',            'MiscController@contact');
@@ -173,3 +176,8 @@ $router->delete('/api/admin/staff/{id}',      'AdminStaffController@destroy');
 
 $router->get('/api/admin/settings',           'AdminSettingsController@index');
 $router->put('/api/admin/settings',           'AdminSettingsController@update');
+
+// ---- Mail Automation ----
+$router->get('/api/admin/automation',         'AdminAutomationController@index');
+$router->put('/api/admin/automation',         'AdminAutomationController@save');
+$router->post('/api/admin/automation/run',    'AdminAutomationController@run');

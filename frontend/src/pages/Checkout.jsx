@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Check, Tag, QrCode, Banknote, Star, Upload, Copy, Loader2, ShieldCheck } from 'lucide-react';
+import { Plus, Check, Tag, QrCode, Banknote, Upload, Copy, Loader2, ShieldCheck, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
 import api from '../api/client';
@@ -21,12 +21,10 @@ export default function Checkout() {
   const [coupon, setCoupon] = useState('');
   const [discount, setDiscount] = useState(0);
   const [appliedCode, setAppliedCode] = useState('');
-  const [method, setMethod] = useState('upi');
+  const [method, setMethod] = useState('cod');
   const [placing, setPlacing] = useState(false);
   const [offers, setOffers] = useState([]);
   const [shipInfo, setShipInfo] = useState(null);
-  const [loyalty, setLoyalty] = useState(null);
-  const [usePoints, setUsePoints] = useState(false);
   // UPI / QR manual payment
   const [payInfo, setPayInfo] = useState(null);   // admin-configured UPI/bank details
   const [qrUrl, setQrUrl] = useState('');          // generated UPI QR (data URI)
@@ -38,7 +36,6 @@ export default function Checkout() {
     loadAddresses();
     api.get('/api/offers').then((r) => setOffers(r.data.data)).catch(() => { });
     api.get('/api/shipping-info').then((r) => setShipInfo(r.data.data)).catch(() => { });
-    api.get('/api/loyalty').then((r) => setLoyalty(r.data.data)).catch(() => { });
     api.get('/api/payment-info').then((r) => setPayInfo(r.data.data)).catch(() => { });
   }, []);
 
@@ -86,32 +83,27 @@ export default function Checkout() {
   // First order ships free; repeat orders are free only above the threshold.
   const shipping = shipInfo?.is_first_order ? 0 : (subtotal - discount >= freeMin ? 0 : baseShip);
 
-  // Loyalty: each point is worth `pointValue` rupees. Redeem up to the user's
-  // balance or `redeem_cap_pct` of the post-coupon amount.
-  const pointValue = loyalty?.point_value ?? 1;
-  const redeemCapPct = (loyalty?.redeem_cap_pct ?? 50) / 100;
-  const maxRedeem = Math.min(
-    loyalty?.points || 0,
-    Math.floor(((subtotal - discount) * redeemCapPct) / pointValue),
-  );
-  const pointsToUse = usePoints ? maxRedeem : 0;
-  const redeemValue = Math.round(pointsToUse * pointValue * 100) / 100; // rupees off
-  const pointsEarned = Math.min(
-    Math.floor(subtotal * ((loyalty?.earn_rate_pct ?? 5) / 100)),
-    loyalty?.earn_cap ?? Infinity, // never exceed the per-order cap
-  );
-  const total = Math.max(0, subtotal - discount - redeemValue + shipping);
+  const total = Math.max(0, subtotal - discount + shipping);
+
+  // Payment rule (live from the DB): COD is offered only up to cod_max; Razorpay is
+  // always available. Above the threshold, Razorpay is the only option.
+  const codMax = Number(payInfo?.cod_max_amount ?? 1000);
+  const codAllowed = total <= codMax;
+  useEffect(() => {
+    // If COD is no longer allowed (cart crossed the threshold), fall back to Razorpay.
+    if (!codAllowed && method === 'cod') setMethod('razorpay');
+  }, [codAllowed]);
 
   // Build the UPI intent + generate a QR that encodes the exact payable amount.
   const upiEnabled = !!payInfo?.upi_enabled;
   const upiLink = upiEnabled
-    ? `upi://pay?pa=${encodeURIComponent(payInfo.upi_id)}&pn=${encodeURIComponent(payInfo.payee_name || 'Novo Clothing')}&am=${total.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Novo Clothing Order')}`
+    ? `upi://pay?pa=${encodeURIComponent(payInfo.upi_id)}&pn=${encodeURIComponent(payInfo.payee_name || 'FURCIL')}&am=${total.toFixed(2)}&cu=INR&tn=${encodeURIComponent('FURCIL Order')}`
     : '';
   useEffect(() => {
     if (method !== 'upi' || !upiEnabled) { setQrUrl(''); return; }
     // Prefer the admin's custom QR image; else generate one from the UPI link.
     if (payInfo.qr_image) { setQrUrl(payInfo.qr_image); return; }
-    QRCode.toDataURL(upiLink, { width: 260, margin: 1, color: { dark: '#0b0b0f', light: '#ffffff' } })
+    QRCode.toDataURL(upiLink, { width: 260, margin: 1, color: { dark: '#1c3025', light: '#ffffff' } })
       .then(setQrUrl).catch(() => setQrUrl(''));
   }, [method, upiEnabled, upiLink, payInfo?.qr_image]);
 
@@ -134,6 +126,57 @@ export default function Checkout() {
     e.target.value = '';
   };
 
+  // Lazy-load Razorpay's checkout script only when needed.
+  const loadRazorpay = () => new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+
+  // Razorpay gateway: create a pending order on the server, open the hosted
+  // checkout, then verify the signature server-side to finalize the order.
+  const payWithRazorpay = async (payload) => {
+    const { data } = await api.post('/api/checkout/create-order', payload);
+    const d = data.data;
+    // No API keys on the server -> test mode: finalize without the live gateway.
+    if (d.is_test || !d.razorpay_key) {
+      await api.post('/api/checkout/verify', { order_id: d.order_id, is_test: true });
+      toast.success('Order placed (test mode — add Razorpay keys for live payments)');
+      refresh();
+      return navigate(`/order-success/${d.order_id}`);
+    }
+    const ok = await loadRazorpay();
+    if (!ok) return toast.error('Could not load Razorpay. Check your connection.');
+    const rzp = new window.Razorpay({
+      key: d.razorpay_key,
+      amount: d.amount,
+      currency: d.currency,
+      name: 'FURCIL',
+      description: `Order ${d.order_number}`,
+      order_id: d.razorpay_order_id,
+      prefill: { name: custName, contact: custPhone },
+      theme: { color: '#bf924d' },
+      handler: async (resp) => {
+        try {
+          await api.post('/api/checkout/verify', {
+            order_id: d.order_id,
+            razorpay_order_id: resp.razorpay_order_id,
+            razorpay_payment_id: resp.razorpay_payment_id,
+            razorpay_signature: resp.razorpay_signature,
+          });
+          toast.success('Payment successful!');
+          refresh();
+          navigate(`/order-success/${d.order_id}`);
+        } catch (err) { toast.error(err.message || 'Verification failed'); }
+      },
+      modal: { ondismiss: () => toast('Payment cancelled') },
+    });
+    rzp.open();
+  };
+
   const placeOrder = async () => {
     if (!selected) return toast.error('Please select a delivery address');
     setPlacing(true);
@@ -141,8 +184,9 @@ export default function Checkout() {
       const payload = {
         address_id: selected,
         coupon_code: discount ? coupon : undefined,
-        points_redeem: pointsToUse || undefined,
       };
+
+      if (method === 'razorpay') { await payWithRazorpay(payload); return; }
 
       if (method === 'cod') {
         const { data } = await api.post('/api/orders/cod', payload);
@@ -211,15 +255,32 @@ export default function Checkout() {
             )}
           </section>
 
-          {/* Payment method */}
+          {/* Payment method — gated by order total (live rule from the DB) */}
           <section className="card p-6">
-            <h2 className="mb-4 text-lg font-semibold">Payment Method</h2>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <PayOption active={method === 'upi'} onClick={() => setMethod('upi')} icon={QrCode}
-                title="Pay Online (UPI / QR)" subtitle="Scan the QR or pay to our UPI ID" />
-              <PayOption active={method === 'cod'} onClick={() => setMethod('cod')} icon={Banknote}
-                title="Cash on Delivery" subtitle="Pay when you receive" />
+            <h2 className="mb-1 text-lg font-semibold">Payment Method</h2>
+            <p className="mb-4 text-xs text-gray-400">
+              {codAllowed
+                ? `Cash on Delivery or pay online. (COD available up to ${inr(codMax)}.)`
+                : `Orders above ${inr(codMax)} are paid online (Razorpay) only.`}
+            </p>
+            <div className={`grid gap-3 ${codAllowed ? 'sm:grid-cols-2' : ''}`}>
+              <PayOption active={method === 'razorpay'} onClick={() => setMethod('razorpay')} icon={CreditCard}
+                title="Card / UPI / Netbanking" subtitle="Secure payment via Razorpay" />
+              {codAllowed && (
+                <PayOption active={method === 'cod'} onClick={() => setMethod('cod')} icon={Banknote}
+                  title="Cash on Delivery" subtitle="Pay when you receive" />
+              )}
             </div>
+
+            {/* Razorpay panel */}
+            {method === 'razorpay' && (
+              <div className="mt-5 rounded-2xl border border-gold/30 bg-gold/[0.03] p-5">
+                <p className="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-300">
+                  <ShieldCheck size={16} className="mt-0.5 shrink-0 text-gold" />
+                  You'll pay securely via Razorpay — Cards, UPI, Netbanking &amp; Wallets. Your order is confirmed instantly on successful payment.
+                </p>
+              </div>
+            )}
 
             {/* UPI / QR payment panel */}
             {method === 'upi' && (
@@ -341,21 +402,8 @@ export default function Checkout() {
             </div>
           )}
 
-          {/* Loyalty points redemption */}
-          {loyalty?.points > 0 && maxRedeem > 0 && (
-            <label className="mb-2 flex cursor-pointer items-center justify-between rounded-xl border border-gold/30 bg-gold/5 px-3 py-2">
-              <span className="flex items-center gap-2 text-sm">
-                <Star size={14} className="fill-gold text-gold" />
-                Use {maxRedeem} points <span className="text-gray-400">(−{inr(Math.round(maxRedeem * pointValue * 100) / 100)})</span>
-              </span>
-              <input type="checkbox" checked={usePoints} onChange={(e) => setUsePoints(e.target.checked)}
-                className="h-4 w-4 accent-gold" />
-            </label>
-          )}
-
           <Row label="Subtotal" value={inr(subtotal)} />
           {discount > 0 && <Row label="Discount" value={`-${inr(discount)}`} className="text-emerald-500" />}
-          {pointsToUse > 0 && <Row label={`Points (${pointsToUse})`} value={`-${inr(redeemValue)}`} className="text-gold" />}
           <Row label="Shipping" value={shipping ? inr(shipping) : 'Free'} />
           {shipInfo?.is_first_order ? (
             <p className="-mt-1 text-xs text-emerald-500">🎉 Free shipping on your first order</p>
@@ -364,15 +412,12 @@ export default function Checkout() {
           ) : null}
           <div className="my-3 border-t border-black/5 dark:border-white/10" />
           <Row label="Total" value={inr(total)} bold />
-          {pointsEarned > 0 && (
-            <p className="mt-2 flex items-center gap-1.5 rounded-xl bg-gold/5 px-3 py-2 text-xs text-gold">
-              <Star size={13} className="fill-gold text-gold" />
-              You’ll earn <span className="font-semibold">{pointsEarned} points</span> on this order
-            </p>
-          )}
 
           <button onClick={placeOrder} disabled={placing || !upiReady} className="btn-gold mt-6 w-full disabled:opacity-60">
-            {placing ? 'Processing…' : method === 'cod' ? 'Place Order' : `I've Paid ${inr(total)} — Place Order`}
+            {placing ? 'Processing…'
+              : method === 'cod' ? 'Place Order'
+              : method === 'razorpay' ? `Pay ${inr(total)}`
+              : `I've Paid ${inr(total)} — Place Order`}
           </button>
           {method === 'upi' && upiEnabled && !upiReady && (
             <p className="mt-2 text-center text-xs text-gray-400">Enter the transaction id &amp; upload the screenshot to continue</p>

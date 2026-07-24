@@ -1,6 +1,17 @@
+# ── Security: block direct web access to secrets & internals ──
+Options -Indexes
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+<FilesMatch "\.(env|log|sql|md|example|ini|lock|json|sh|bat)$">
+    Require all denied
+</FilesMatch>
+# The whole storage/ dir (mail.log, uploads) is private
+RedirectMatch 403 ^/furcil/backend/storage/
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /CloudFashion/backend/
+    RewriteBase /furcil/backend/
 
     # Forward the Authorization header to PHP (CGI/FastCGI strip it otherwise)
     RewriteCond %{HTTP:Authorization} ^(.+)$

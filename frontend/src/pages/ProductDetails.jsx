@@ -60,6 +60,12 @@ export default function ProductDetails() {
 
   const variant = product.variants?.find((v) => (!product.sizes.length || v.size === size) && (!product.colors.length || v.color === color));
   const inStock = (variant?.stock ?? product.stock) > 0;
+  // Selling price for the selected variant: its own manual price, else base (+ legacy price_diff).
+  const displayPrice = variant?.price != null
+    ? Number(variant.price)
+    : Number(product.price) + (Number(variant?.price_diff) || 0);
+  // MRP for the selected variant: its own MRP, else the product base MRP.
+  const displayMrp = variant?.mrp != null ? Number(variant.mrp) : Number(product.mrp || 0);
 
   const validateSelection = () => {
     if (product.sizes.length && !size) { toast.error('Please select a size'); return false; }
@@ -160,11 +166,12 @@ export default function ProductDetails() {
           </div>
 
           <div className="mt-5 flex items-end gap-3">
-            <span className="text-3xl font-bold">{inr(product.price)}</span>
-            {product.mrp > product.price && (
+            {/* Price reflects the selected variant's own price when set. */}
+            <span className="text-3xl font-bold">{inr(displayPrice)}</span>
+            {displayMrp > displayPrice && (
               <>
-                <span className="text-lg text-gray-400 line-through">{inr(product.mrp)}</span>
-                <span className="rounded bg-gold/15 px-2 py-0.5 text-sm font-semibold text-gold">{product.discount_pct}% OFF</span>
+                <span className="text-lg text-gray-400 line-through">{inr(displayMrp)}</span>
+                <span className="rounded bg-gold/15 px-2 py-0.5 text-sm font-semibold text-gold">{Math.round((1 - displayPrice / displayMrp) * 100)}% OFF</span>
               </>
             )}
           </div>
@@ -321,7 +328,7 @@ export default function ProductDetails() {
 
       <RecentlyViewed excludeId={product.id} />
 
-      {sizeGuide && <SizeGuideModal category={product.category_name} onClose={() => setSizeGuide(false)} />}
+      {sizeGuide && <SizeGuideModal category={product.category_name} sizes={product.sizes} onClose={() => setSizeGuide(false)} />}
     </div>
   );
 }

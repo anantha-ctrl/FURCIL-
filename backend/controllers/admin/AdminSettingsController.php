@@ -30,6 +30,9 @@ class AdminSettingsController
         'landing_img_intro'       => 'text',
         'landing_img_men'         => 'text',
         'landing_img_newarrival'  => 'text',
+        // Orders & payment rules
+        'order_prefix'            => 'text',
+        'cod_max_amount'          => 'number',
         // Billing / POS invoice defaults
         'billing_tax_pct'         => 'number',
         'billing_invoice_prefix'  => 'text',

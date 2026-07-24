@@ -71,7 +71,7 @@ class CartController
         $stmt = db()->prepare(
             "SELECT ct.id, ct.quantity, ct.variant_id,
                     p.id AS product_id, p.name, p.slug, p.price, p.mrp, p.stock,
-                    pv.size, pv.color, pv.price_diff, pv.stock AS variant_stock,
+                    pv.size, pv.color, pv.price_diff, pv.price AS variant_price, pv.stock AS variant_stock,
                     (SELECT image_url FROM product_images WHERE product_id=p.id ORDER BY is_primary DESC LIMIT 1) AS image
              FROM cart ct
              JOIN products p ON p.id=ct.product_id
@@ -83,7 +83,9 @@ class CartController
 
         $subtotal = 0;
         foreach ($items as &$it) {
-            $price = (float) $it['price'] + (float) ($it['price_diff'] ?? 0);
+            $price = ($it['variant_price'] !== null)
+                ? (float) $it['variant_price']
+                : (float) $it['price'] + (float) ($it['price_diff'] ?? 0);
             $it['unit_price'] = $price;
             $it['line_total'] = $price * (int) $it['quantity'];
             $it['price'] = (float) $it['price'];

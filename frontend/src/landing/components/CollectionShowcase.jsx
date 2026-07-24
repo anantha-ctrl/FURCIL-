@@ -20,7 +20,7 @@ export default function CollectionShowcase({
   return (
     <section
       ref={ref}
-      className={`relative overflow-hidden py-20 sm:py-28 ${dark ? 'bg-luxe-ink text-white' : 'bg-luxe-bg text-luxe-ink dark:bg-ink dark:text-white'}`}
+      className={`relative overflow-hidden py-16 sm:py-20 ${dark ? 'bg-luxe-ink text-white' : 'bg-luxe-bg text-luxe-ink dark:bg-ink dark:text-white'}`}
     >
       <div className={`mx-auto grid max-w-[1400px] items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-12 ${reverse ? 'lg:[direction:rtl]' : ''}`}>
         {/* Text */}
@@ -65,7 +65,7 @@ export default function CollectionShowcase({
               className="relative overflow-hidden rounded-luxe-lg shadow-luxe"
             >
               <motion.img style={{ y, scale }} src={image} alt={eyebrow}
-                className="aspect-[4/5] w-full object-cover" />
+                className="aspect-square w-full object-cover" />
               <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
             </motion.div>
           </Tilt3D>

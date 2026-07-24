@@ -3,21 +3,50 @@ import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import Logo from '../../components/Logo';
+import api from '../../api/client';
 
-// Rotating brand panel — fashion imagery + tagline.
-const SLIDES = [
-  { img: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200', text: 'Premium fashion, curated for the modern wardrobe.' },
-  { img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200', text: 'New-season arrivals, handpicked for you.' },
-  { img: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=1200', text: 'Timeless pieces, crafted with care.' },
+// Fallback panel (used only until real brand/product imagery loads from the DB).
+const FALLBACK = [
+  { img: 'https://placehold.co/1200x1600/e8e2d5/1c3025?text=FURCIL', text: 'Premium pet care, curated for every companion.' },
+  { img: 'https://placehold.co/1200x1600/e8e2d5/1c3025?text=Pets', text: 'Nutrition, comfort and play — delivered with care.' },
 ];
 
 export default function AuthShell({ title, subtitle, children, footer }) {
   const [i, setI] = useState(0);
+  const [slides, setSlides] = useState(FALLBACK);
+
+  // Pull live brand banners + product images from the backend for the panel.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const [bRes, pRes] = await Promise.allSettled([
+          api.get('/api/banners'),
+          api.get('/api/products?limit=6'),
+        ]);
+        const out = [];
+        if (bRes.status === 'fulfilled') {
+          (bRes.value.data.data || []).forEach((b) => {
+            if (b.image_url) out.push({ img: b.image_url, text: b.subtitle || b.title || '' });
+          });
+        }
+        if (pRes.status === 'fulfilled') {
+          const d = pRes.value.data.data;
+          (Array.isArray(d) ? d : d.products || []).forEach((p) => {
+            if (p.image) out.push({ img: p.image, text: p.name });
+          });
+        }
+        if (alive && out.length) { setSlides(out.slice(0, 6)); setI(0); }
+      } catch { /* keep fallback */ }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setI((p) => (p + 1) % SLIDES.length), 5000);
+    if (slides.length < 2) return undefined;
+    const t = setInterval(() => setI((p) => (p + 1) % slides.length), 5000);
     return () => clearInterval(t);
-  }, []);
+  }, [slides.length]);
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -26,7 +55,7 @@ export default function AuthShell({ title, subtitle, children, footer }) {
         <AnimatePresence mode="popLayout">
           <motion.img
             key={i}
-            src={SLIDES[i].img}
+            src={(slides[i] || slides[0]).img}
             alt=""
             initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -48,14 +77,14 @@ export default function AuthShell({ title, subtitle, children, footer }) {
               transition={{ duration: 0.5 }}
               className="mt-3 max-w-sm text-gray-300"
             >
-              {SLIDES[i].text}
+              {(slides[i] || slides[0]).text || 'Premium pet care, curated for every companion.'}
             </motion.p>
           </AnimatePresence>
         </div>
 
         {/* progress dots */}
         <div className="absolute bottom-6 right-12 flex gap-2">
-          {SLIDES.map((_, n) => (
+          {slides.map((_, n) => (
             <button key={n} onClick={() => setI(n)} aria-label={`Slide ${n + 1}`}
               className={`h-1.5 rounded-full transition-all ${n === i ? 'w-6 bg-gold' : 'w-2 bg-white/40 hover:bg-white/70'}`} />
           ))}

@@ -33,14 +33,14 @@ export default function Newsletter() {
       <div className="relative mx-auto max-w-3xl px-6 text-center sm:px-10">
         <p className="mb-6 text-xs uppercase tracking-[0.5em] text-luxe-gold">Join the atelier</p>
         <h2 className="font-display text-4xl font-bold leading-tight sm:text-6xl">
-          <MaskReveal lines={['Be first to the', 'next collection.']} />
+          <MaskReveal lines={['Be first to the', 'next arrival.']} />
         </h2>
         <motion.p
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           transition={{ delay: 0.2, duration: 0.7 }}
           className="mx-auto mt-6 max-w-md text-white/60"
         >
-          Private drops, styling notes and members-only offers — straight to your inbox.
+          New arrivals, pet-care tips and members-only offers — straight to your inbox.
         </motion.p>
 
         {done ? (

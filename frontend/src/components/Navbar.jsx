@@ -102,7 +102,7 @@ export default function Navbar() {
 
           <form onSubmit={submitSearch} className="relative ml-auto hidden flex-1 max-w-xs md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search fashion…"
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search pet supplies…"
               onFocus={() => suggestions.length && setShowSuggest(true)}
               onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
               className="input !py-2 pl-10 text-sm" />
@@ -166,7 +166,7 @@ export default function Navbar() {
             {/* Search */}
             <form onSubmit={submitSearch} className="relative mb-5">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search fashion…"
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search pet supplies…"
                 className="input !py-2.5 pl-10 text-sm" />
               {SuggestList}
             </form>

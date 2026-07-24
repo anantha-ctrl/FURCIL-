@@ -9,6 +9,7 @@ class CheckoutController
         $userId = Auth::id();
         $d = OrderController::buildOrderData($userId, Request::body());
 
+        // Razorpay is available for any amount (it's the only option above the COD threshold).
         $rzpOrder = Razorpay::createOrder((int) round($d['total'] * 100), $d['order_number']);
 
         // If Razorpay keys are not configured, fall back to a "test" order so the flow is still demoable.

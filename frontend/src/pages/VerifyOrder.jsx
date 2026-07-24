@@ -48,7 +48,7 @@ export default function VerifyOrder() {
               <ShieldCheck size={34} className="shrink-0 text-emerald-500" />
               <div>
                 <p className="font-display text-lg font-bold text-emerald-600 dark:text-emerald-400">Order verified ✓</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Authentic order from Novo Clothing</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Authentic order from FURCIL</p>
               </div>
             </div>
 
@@ -108,7 +108,7 @@ export default function VerifyOrder() {
         )}
 
         <p className="mt-6 text-center text-xs text-gray-400">
-          <Link to="/" className="text-gold hover:underline">Novo Clothing</Link> · secure order verification
+          <Link to="/" className="text-gold hover:underline">FURCIL</Link> · secure order verification
         </p>
       </div>
     </div>

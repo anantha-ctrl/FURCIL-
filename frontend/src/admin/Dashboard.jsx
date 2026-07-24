@@ -16,7 +16,7 @@ import { inr, dateFmt, timeAgo, statusColor } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 
 // ── Chart tooltip styles ──
-const TOOLTIP = { background: '#15151c', border: '1px solid #c9a96a44', borderRadius: 12 };
+const TOOLTIP = { background: '#264234', border: '1px solid #bf924d44', borderRadius: 12 };
 const LABEL  = { color: '#ffffff', fontWeight: 600, marginBottom: 2 };
 const ITEM   = { color: '#e7d8b6' };
 
@@ -161,12 +161,12 @@ export default function Dashboard() {
         <KpiCard i={7} icon={Percent} label="Conversion Rate" value={`${cards.conversion_rate || 0}%`} gradient="icon-gradient-indigo" accent="text-indigo-500" />
       </div>
 
-      {/* ═══════ Sales by channel ═══════ */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* ═══════ Store insights ═══════ */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <KpiCard i={0} icon={Globe} label="Online Sales" value={inr(cards.online_sales)} gradient="icon-gradient-cyan" accent="text-cyan-500" />
-        <KpiCard i={1} icon={Store} label="Counter Sales" value={inr(cards.counter_sales)} gradient="icon-gradient-gold" accent="text-gold" to="/admin/billing" />
-        <KpiCard i={2} icon={Receipt} label="Counter Bills" value={cards.counter_bills ?? 0} gradient="icon-gradient-emerald" accent="text-emerald-500" to="/admin/billing" />
-        <KpiCard i={3} icon={UserPlus} label="New Customers (7d)" value={cards.new_customers_7d} trend={trends.customers} gradient="icon-gradient-indigo" accent="text-indigo-500" />
+        <KpiCard i={1} icon={UserPlus} label="New Customers (7d)" value={cards.new_customers_7d} trend={trends.customers} gradient="icon-gradient-indigo" accent="text-indigo-500" />
+        <KpiCard i={2} icon={AlertTriangle} label="Low Stock" value={cards.low_stock ?? 0} gradient="icon-gradient-rose" accent="text-rose-500"
+          to={cards.low_stock > 0 ? '/admin/inventory' : undefined} pulse={cards.low_stock > 0} />
       </div>
 
       {/* ═══════ Low stock alert ═══════ */}
@@ -308,8 +308,7 @@ function RevenueChart({ data: raw }) {
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-semibold">Revenue (Last 6 Months)</h3>
         <div className="flex items-center gap-3 text-xs text-gray-400">
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gold" /> Online</span>
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Counter</span>
+          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gold" /> Revenue</span>
           <span className="flex items-center gap-1"><span className="h-2 w-5 rounded-sm border border-blue-400/40" /> Orders</span>
         </div>
       </div>
@@ -317,12 +316,8 @@ function RevenueChart({ data: raw }) {
         <ComposedChart data={monthData}>
           <defs>
             <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c9a96a" stopOpacity={0.45} />
-              <stop offset="100%" stopColor="#c9a96a" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="counterGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+              <stop offset="0%" stopColor="#bf924d" stopOpacity={0.45} />
+              <stop offset="100%" stopColor="#bf924d" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
@@ -330,8 +325,7 @@ function RevenueChart({ data: raw }) {
           <YAxis yAxisId="left" stroke="#888" fontSize={12} />
           <YAxis yAxisId="right" orientation="right" stroke="#888" fontSize={12} allowDecimals={false} />
           <Tooltip contentStyle={TOOLTIP} labelStyle={LABEL} itemStyle={ITEM} formatter={(v, n) => n === 'orders' ? v : inr(v)} />
-          <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#c9a96a" strokeWidth={2} fill="url(#revGrad)" name="Online Revenue" />
-          <Area yAxisId="left" type="monotone" dataKey="counter" stroke="#10b981" strokeWidth={2} fill="url(#counterGrad)" name="Counter Revenue" />
+          <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#bf924d" strokeWidth={2} fill="url(#revGrad)" name="Revenue" />
           <Bar yAxisId="right" dataKey="orders" fill="#3b82f6" opacity={0.3} radius={[4, 4, 0, 0]} barSize={20} name="Orders" />
         </ComposedChart>
       </ResponsiveContainer>
@@ -344,7 +338,7 @@ function RevenueChart({ data: raw }) {
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function StatusDonut({ data: raw, total }) {
   const pieData = useMemo(
-    () => raw.map((s) => ({ name: s.status, value: Number(s.count), fill: STATUS_COLORS[s.status] || '#c9a96a' })),
+    () => raw.map((s) => ({ name: s.status, value: Number(s.count), fill: STATUS_COLORS[s.status] || '#bf924d' })),
     [raw]
   );
 

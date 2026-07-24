@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { NavLink, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Package, Tags, ShoppingCart, Users, Ticket, Boxes, BarChart3,
-  Image as ImageIcon, Star, Undo2, Gift, Mail, LogOut, Menu, X, Sun, Moon,
+  Image as ImageIcon, Star, Undo2, Gift, Mail, MailCheck, LogOut, Menu, X, Sun, Moon,
   User, Settings, KeyRound, ChevronDown, Receipt, UserCog, FileText,
   PanelLeftClose, PanelLeft, Search,
 } from 'lucide-react';
@@ -32,7 +32,6 @@ const NAV_GROUPS = [
     label: 'SALES',
     items: [
       ['/admin/orders', ShoppingCart, 'Orders'],
-      ['/admin/billing', Receipt, 'Billing'],
       ['/admin/invoices', FileText, 'Invoices'],
       ['/admin/returns', Undo2, 'Returns'],
       ['/admin/coupons', Ticket, 'Coupons'],
@@ -43,15 +42,15 @@ const NAV_GROUPS = [
     items: [
       ['/admin/customers', Users, 'Customers'],
       ['/admin/reviews', Star, 'Reviews'],
-      ['/admin/loyalty', Gift, 'Loyalty'],
       ['/admin/messages', Mail, 'Messages'],
     ],
   },
   {
     label: 'MANAGEMENT',
     items: [
-      ['/admin/cashiers', UserCog, 'Cashiers'],
       ['/admin/reports', BarChart3, 'Reports'],
+      ['/admin/automation', MailCheck, 'Automation'],
+      ['/admin/settings', Settings, 'Settings'],
     ],
   },
 ];
