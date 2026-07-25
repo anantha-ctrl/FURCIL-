@@ -31,9 +31,6 @@ export default function CashierLayout() {
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-bold text-ink">
             {user?.name?.[0]}
           </div>
-          <button onClick={toggle} className="rounded-full p-2 hover:bg-gold/10" aria-label="theme">
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
           <button onClick={handleLogout}
             className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-rose-500 transition hover:bg-rose-500/10">
             <LogOut size={16} /> <span className="hidden sm:inline">Logout</span>

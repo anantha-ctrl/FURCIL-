@@ -9,6 +9,7 @@ import { inr } from '../utils/format';
 const blank = {
   name: '', category_id: '', brand: '', description: '', price: '', mrp: '',
   stock: 0, low_stock_alert: 5, is_featured: 0, is_trending: 0, is_active: 1,
+  is_returnable: 1,
 };
 
 export default function AdminProductForm() {
@@ -34,6 +35,7 @@ export default function AdminProductForm() {
             name: p.name, category_id: '', brand: p.brand || '', description: '', price: p.price,
             mrp: p.mrp, stock: p.stock, low_stock_alert: 5,
             is_featured: p.is_featured, is_trending: p.is_trending, is_active: p.is_active,
+            is_returnable: p.is_returnable != null ? p.is_returnable : 1,
           });
           // Pull full detail (category, specs, variants, images) from public endpoint
           api.get(`/api/products/${p.slug}`).then((d) => {
@@ -115,7 +117,12 @@ export default function AdminProductForm() {
           <Toggle label="Active" v={form.is_active} on={(v) => set('is_active', v)} />
           <Toggle label="Featured" v={form.is_featured} on={(v) => set('is_featured', v)} />
           <Toggle label="Trending" v={form.is_trending} on={(v) => set('is_trending', v)} />
+          <Toggle label="Returnable" v={form.is_returnable} on={(v) => set('is_returnable', v)} />
         </div>
+        <p className="text-xs text-gray-400">
+          Turn <b>Returnable</b> off for products that can’t be returned (e.g. opened food, hygiene items).
+          Customers won’t see the “Request Return” option for orders made up only of non-returnable products.
+        </p>
       </div>
 
       {/* Images */}

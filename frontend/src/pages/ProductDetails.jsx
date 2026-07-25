@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Star, Heart, Truck, RefreshCw, ShieldCheck, Minus, Plus, BadgeCheck } from 'lucide-react';
+import { Star, Heart, Truck, RefreshCw, ShieldCheck, Minus, Plus, BadgeCheck, Ban } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/client';
 import { inr } from '../utils/format';
@@ -235,9 +235,14 @@ export default function ProductDetails() {
           <ShareButtons title={product.name} />
 
           <div className="mt-8 grid grid-cols-3 gap-4 border-t border-black/5 pt-6 text-center text-xs dark:border-white/10">
-            {[[Truck, 'Free Shipping'], [RefreshCw, '7-Day Returns'], [ShieldCheck, 'Secure Payment']].map(([Icon, t]) => (
+            {[
+              [Truck, 'Free Shipping'],
+              // Returns badge reflects this product's real returnable flag (from DB).
+              product.is_returnable ? [RefreshCw, '7-Day Returns'] : [Ban, 'Non-returnable'],
+              [ShieldCheck, 'Secure Payment'],
+            ].map(([Icon, t]) => (
               <div key={t} className="flex flex-col items-center gap-1.5 text-gray-500 dark:text-gray-400">
-                <Icon size={20} className="text-gold" /> {t}
+                <Icon size={20} className={product.is_returnable === 0 && t === 'Non-returnable' ? 'text-rose-400' : 'text-gold'} /> {t}
               </div>
             ))}
           </div>

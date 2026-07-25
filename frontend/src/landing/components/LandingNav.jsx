@@ -82,9 +82,6 @@ export default function LandingNav() {
 
         {/* Icons */}
         <div className={`flex items-center gap-1 sm:gap-2 ${solid ? 'text-luxe-ink dark:text-white' : 'text-luxe-ink'}`}>
-          <button onClick={toggle} className="rounded-full p-2.5 transition hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
-            {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
-          </button>
           <Link to="/shop" className="hidden rounded-full p-2.5 transition hover:bg-black/5 dark:hover:bg-white/10 sm:block" aria-label="Search"><Search size={19} /></Link>
           <Link to="/wishlist" className="relative rounded-full p-2.5 transition hover:bg-black/5" aria-label="Wishlist">
             <Heart size={19} />

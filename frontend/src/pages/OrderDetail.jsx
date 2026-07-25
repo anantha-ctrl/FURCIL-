@@ -179,6 +179,18 @@ function ReturnPanel({ order, onChange }) {
     finally { setSaving(false); }
   };
 
+  // No returnable products in this order — show why, no request button.
+  if (!order.returnable) {
+    return (
+      <div className="card p-4 text-sm text-gray-400">
+        <div className="flex items-center gap-2 font-semibold text-gray-500 dark:text-gray-300">
+          <Undo2 size={16} /> Not returnable
+        </div>
+        <p className="mt-1">The item(s) in this order are marked non-returnable and can’t be returned.</p>
+      </div>
+    );
+  }
+
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} className="btn-outline w-full">

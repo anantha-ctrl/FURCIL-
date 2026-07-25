@@ -57,6 +57,8 @@ export default function Footer() {
           <FLink to="/contact">Contact</FLink>
           <FLink to="/privacy">Privacy Policy</FLink>
           <FLink to="/terms">Terms & Conditions</FLink>
+          <FLink to="/shipping">Shipping Policy</FLink>
+          <FLink to="/returns">Returns & Refund</FLink>
         </FooterCol>
 
         <div>

@@ -45,7 +45,7 @@ flowchart TB
 - **Premium landing page** (`/`) — editorial, luxury storytelling built with Framer Motion + Lenis smooth-scroll: a **3D coverflow hero carousel** (admin banners), auto-sliding **category / featured-collection / "styled by you"** carousels (all live from the DB), brand-story scroll reveal, admin-editable hero & story copy + imagery, dark/light toggle, profile dropdown
 - **Home** (`/home`) — Hero slider, featured categories (**live category images**), new arrivals, trending, best sellers, **admin-managed promo banners**, live **offers strip**, **"Shop the Sale"** → on-sale filter
 - **Catalog** — Search, **dynamic facet filters** built from live DB data (category, brand, size, **color swatches**, price range), sort (price/popularity/newest/rating/**discount**), **on-sale** filter, pagination
-- **Product page** — Image gallery with **zoom**, **Quick View** side drawer, specs, variants (size/pack/colour) with **per-size pricing** — selecting a size updates the price, MRP strike-through & discount % live from that variant, a **context-aware size guide** (weight packs → a **pack & feeding guide** built from the product's real variants; beds → dimensions; collars → neck-girth), stock, **reviews & ratings with rating breakdown**, **frequently-bought-together**, related products, **share buttons**, **"notify me when back in stock"**
+- **Product page** — Image gallery with **zoom**, **Quick View** side drawer, specs, variants (size/pack/colour) with **per-size pricing** — selecting a size updates the price, MRP strike-through & discount % live from that variant, a **context-aware size guide** (weight packs → a **pack & feeding guide** built from the product's real variants; beds → dimensions; collars → neck-girth), stock, a **returnable / non-returnable badge** (from the product's real flag), **reviews & ratings with rating breakdown**, **frequently-bought-together**, related products, **share buttons**, **"notify me when back in stock"**
 - **Reviews 2.0** — Verified buyers can review **after delivery**; star rating + title + comment, per-product rating breakdown bars
 - **Product comparison** — Add items to a **compare bar** and view side-by-side specs
 - **Wishlist**, **Cart** (variant-aware, live totals)
@@ -55,7 +55,7 @@ flowchart TB
   - **Smart shipping** — first order ships **free**; repeat orders free above the (admin-set) threshold, else a flat fee
   - **First-order-only coupons** (e.g. `WELCOME10`) validated against order history
   - Atomic order creation (DB transaction — no orphan orders on failure)
-- **Orders** — History, detail with status timeline, **shipment tracking** (carrier + tracking #), **Reorder**, cancel & auto-restock, **post-delivery reviews**, **Returns/Refund requests (RMA)**, **print invoice** (with a delivery-verification QR)
+- **Orders** — History, detail with status timeline, **shipment tracking** (carrier + tracking #), **Reorder**, cancel & auto-restock, **post-delivery reviews**, **Returns/Refund requests (RMA)** — the "Request Return" option only appears for orders that contain at least one **returnable** product; non-returnable-only orders show a clear "Not returnable" note (enforced on the server too) — **print invoice** (with a delivery-verification QR)
 - **Order emails** — Order-placed confirmation + status-update + **return-status** emails
 - **Profile** — Edit details, change password, manage addresses, **Rewards** (mobile-friendly tabbed layout)
 - Recently viewed, newsletter, **working contact form** (saved to DB + emailed), About/Privacy/Terms pages
@@ -69,7 +69,7 @@ flowchart TB
 - **Invoices** — one unified list of **every sale** — online orders **+** counter bills — newest first, with channel filter (All / Online / Counter), KPIs, and **view + print** for each (thermal receipt for counter, A4 invoice for online), auto-refreshing; every printed online invoice carries a **delivery-verification QR** — scanning it opens a **public verify page** that confirms the order & its items **live from the DB** (signed token, tamper-proof)
 - **Cashiers** — create billing-counter staff logins (`cashier` role) that can access **only** the billing screen; block/unblock, reset password, per-cashier sales totals
 - **Notifications** — Bell with live alerts, **mark read/unread**, **delete**, **mark-all-read**
-- **Products** — Full CRUD, multiple images (Cloudinary or inline base64), **variants with a direct per-size Price ₹ + MRP ₹ table** (manual absolute rate per size/pack, own stock; empty falls back to the base price/MRP), specifications, **bulk CSV import** (auto-creates categories)
+- **Products** — Full CRUD, multiple images (Cloudinary or inline base64), **variants with a direct per-size Price ₹ + MRP ₹ table** (manual absolute rate per size/pack, own stock; empty falls back to the base price/MRP), specifications, a **per-product "Returnable" toggle** (off for opened food / hygiene items — shown as a **Returnable / No-return chip in the product list**), and **bulk CSV import** (auto-creates categories; supports a `returnable` column, defaults to yes)
 - **Categories** (clean auto-slugs), **Coupons** (percentage/fixed, min order, expiry, usage limit, **first-order-only**, **edit** support)
 - **Banners** — CRUD for homepage hero/promo banners
 - **Orders** — Filter by status, update lifecycle (pending → processing → packed → shipped → delivered / cancelled), set **carrier + tracking number**, **"Save & notify"** emails the customer; a **Payment Approvals** queue (badge count) surfaces UPI orders awaiting verification — open the proof (transaction id + screenshot) and **approve** (confirms the order, commits stock, emails the customer) or **reject** (emails the reason)
@@ -100,7 +100,8 @@ FURCIL/
 │   ├── migration_025…029.sql     # Pet-store rebrand: catalogue, banners, category/product restores
 │   ├── migration_030…031.sql     # Per-variant absolute price + per-variant MRP
 │   ├── migration_032_mail_automation.sql   # Lifecycle email drip queue + settings
-│   └── migration_033_order_prefix.sql      # Sequential FUR#### order numbers
+│   ├── migration_033_order_prefix.sql      # Sequential FUR#### order numbers
+│   └── migration_034_product_returnable.sql # Per-product returnable flag
 ├── backend/                      # PHP API (front-controller, no Composer needed)
 │   ├── bootstrap.php             # Loads env, core, autoloader
 │   ├── index.php                 # Router + CORS
@@ -181,6 +182,7 @@ erDiagram
         decimal price
         decimal mrp
         int stock
+        tinyint is_returnable "1 = can be returned"
     }
     product_variants {
         bigint id PK
@@ -252,6 +254,7 @@ erDiagram
 | `migration_031_variant_mrp.sql` | **Per-variant MRP** — `product_variants.mrp` (own strike-through price + discount % per size/pack; `NULL` uses the product base MRP) |
 | `migration_032_mail_automation.sql` | **Mail Automation** — `email_automations` queue table (order_id, type, scheduled_at, sent_at, status) + seeded drip config settings (`automation_*_enabled/offset`) |
 | `migration_033_order_prefix.sql` | **Sequential order numbers** — seeds `order_prefix` (default `FUR`); new orders become `FUR00001`, `FUR00002`… (also seeds `cod_max_amount` COD threshold) |
+| `migration_034_product_returnable.sql` | **Per-product returnable flag** — `products.is_returnable` (default `1`); admin toggles it per product, storefront shows a Returnable/Non-returnable badge, and returns are blocked for orders made up only of non-returnable products |
 
 ```bash
 # apply every migration in order (phpMyAdmin or CLI)
@@ -496,7 +499,8 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for production deployment.
 
 ## 🆕 What's New (post-launch updates)
 
-### 🐾 Latest wave — mail automation, sequential order numbers & a total-based payment rule
+### 🐾 Latest wave — per-product returnable flag, mail automation, sequential order numbers & a total-based payment rule
+- **Per-product returnable flag** — each product now carries an admin-set **Returnable** toggle (`products.is_returnable`, default yes — migration 034). Turn it off for items that can't be returned (opened food, hygiene products). It shows end-to-end from live DB data: a **Returnable / No-return chip** in the admin product list, a **Returnable / Non-returnable badge** on the storefront product page, and a **`returnable` column** in the CSV template + bulk import. Returns are gated both in the UI (the "Request Return" button is hidden and a "Not returnable" note shown) **and on the server** — a return request is rejected when an order contains only non-returnable products; mixed orders (at least one returnable item) can still be returned.
 - **Mail Automation drip** — a full lifecycle email sequence anchored to order events: order-confirmation (on placement) → **welcome** + **product feeding guide** (on delivery) → **2-week check-in** → **review request with the customer's referral code** (+20 days) → **reorder reminder** (+27 days). New **Admin → Automation** console: per-step enable toggle + offset-days, KPIs (sent/pending/due/failed), a **live queue log**, and a **Run due now** button. A token-gated **`/api/cron/run?key=`** endpoint lets Windows Task Scheduler / cron send due mail hands-free. Sends through the real SMTP mailer (migration 032, `email_automations` table).
 - **Sequential order numbers** — online orders switched from the random `CF……` format to clean, brand-prefixed **`FUR00001`, `FUR00002`…** generated race-safely inside the order transaction. Prefix is admin-editable (`order_prefix`); existing demo orders were renumbered in place (migration 033).
 - **Total-based payment rule** — orders **up to `cod_max_amount` (₹1,000)** may pay **COD or online**; **above it, only Razorpay** is offered. Enforced on both the checkout UI and the server (COD/UPI/create-order endpoints). Threshold is admin-editable in **Settings → Orders & payment rules**.

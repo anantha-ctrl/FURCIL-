@@ -6,7 +6,7 @@ class AdminProductController
         Auth::admin();
         $rows = db()->query(
             "SELECT p.id, p.name, p.slug, p.brand, p.price, p.mrp, p.stock, p.is_active, p.is_featured,
-                    p.is_trending, p.rating_avg, p.sold_count, c.name AS category,
+                    p.is_trending, p.is_returnable, p.rating_avg, p.sold_count, c.name AS category,
                     (SELECT image_url FROM product_images WHERE product_id=p.id ORDER BY is_primary DESC LIMIT 1) AS image
              FROM products p JOIN categories c ON c.id=p.category_id ORDER BY p.created_at DESC"
         )->fetchAll();
@@ -31,8 +31,8 @@ class AdminProductController
         $db->prepare(
             'INSERT INTO products
              (name, slug, category_id, brand, description, specifications, price, mrp, stock, low_stock_alert,
-              is_featured, is_trending, is_active)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
+              is_featured, is_trending, is_active, is_returnable)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
         )->execute([
             $data['name'], $slug, (int) $data['category_id'], $data['brand'] ?? null,
             $data['description'] ?? null,
@@ -40,6 +40,8 @@ class AdminProductController
             $data['price'], $data['mrp'], (int) ($data['stock'] ?? 0), (int) ($data['low_stock_alert'] ?? 5),
             !empty($data['is_featured']) ? 1 : 0, !empty($data['is_trending']) ? 1 : 0,
             isset($data['is_active']) ? (int) $data['is_active'] : 1,
+            // Default to returnable unless the admin explicitly turns it off.
+            isset($data['is_returnable']) ? (int) (bool) $data['is_returnable'] : 1,
         ]);
         $productId = (int) $db->lastInsertId();
 
@@ -57,13 +59,15 @@ class AdminProductController
         $db = db();
         $db->prepare(
             'UPDATE products SET name=?, category_id=?, brand=?, description=?, specifications=?,
-             price=?, mrp=?, stock=?, low_stock_alert=?, is_featured=?, is_trending=?, is_active=? WHERE id=?'
+             price=?, mrp=?, stock=?, low_stock_alert=?, is_featured=?, is_trending=?, is_active=?,
+             is_returnable=? WHERE id=?'
         )->execute([
             $data['name'], (int) $data['category_id'], $data['brand'] ?? null, $data['description'] ?? null,
             isset($data['specifications']) ? json_encode($data['specifications']) : null,
             $data['price'], $data['mrp'], (int) ($data['stock'] ?? 0), (int) ($data['low_stock_alert'] ?? 5),
             !empty($data['is_featured']) ? 1 : 0, !empty($data['is_trending']) ? 1 : 0,
-            isset($data['is_active']) ? (int) $data['is_active'] : 1, $id,
+            isset($data['is_active']) ? (int) $data['is_active'] : 1,
+            isset($data['is_returnable']) ? (int) (bool) $data['is_returnable'] : 1, $id,
         ]);
 
         if (isset($data['variants'])) {
@@ -132,8 +136,8 @@ class AdminProductController
         }
 
         $ins = $db->prepare(
-            'INSERT INTO products (name, slug, category_id, brand, description, price, mrp, stock, low_stock_alert, is_active)
-             VALUES (?,?,?,?,?,?,?,?,?,?)'
+            'INSERT INTO products (name, slug, category_id, brand, description, price, mrp, stock, low_stock_alert, is_active, is_returnable)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?)'
         );
         $imgIns = $db->prepare(
             'INSERT INTO product_images (product_id, image_url, is_primary, sort_order) VALUES (?,?,1,0)'
@@ -177,6 +181,11 @@ class AdminProductController
             if (isset($r['active']) && $r['active'] !== '') {
                 $active = in_array(strtolower((string) $r['active']), ['1', 'yes', 'true', 'active', 'y'], true) ? 1 : 0;
             }
+            // Returnable defaults to yes when the column is missing/blank.
+            $returnable = 1;
+            if (isset($r['returnable']) && $r['returnable'] !== '') {
+                $returnable = in_array(strtolower((string) $r['returnable']), ['1', 'yes', 'true', 'y'], true) ? 1 : 0;
+            }
 
             try {
                 $ins->execute([
@@ -190,6 +199,7 @@ class AdminProductController
                     (int) ($r['stock'] ?? 0),
                     (int) ($r['low_stock_alert'] ?? 5),
                     $active,
+                    $returnable,
                 ]);
                 $pid = (int) $db->lastInsertId();
 

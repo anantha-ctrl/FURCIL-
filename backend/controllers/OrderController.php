@@ -58,6 +58,11 @@ class OrderController
         $ret->execute([$order['id']]);
         $order['return'] = $ret->fetch() ?: null;
 
+        // Whether a return can be raised: at least one item is a product still
+        // flagged returnable. Items whose product was deleted (product_id NULL)
+        // don't count. Drives the "Request Return" button on the frontend.
+        $order['returnable'] = self::orderHasReturnable($db, (int) $order['id']);
+
         Response::success($order);
     }
 
@@ -65,6 +70,18 @@ class OrderController
     public static function codMax(): float
     {
         return (float) Setting::get('cod_max_amount', 1000);
+    }
+
+    /** True when the order contains at least one product still flagged returnable. */
+    public static function orderHasReturnable(PDO $db, int $orderId): bool
+    {
+        $q = $db->prepare(
+            'SELECT COUNT(*) FROM order_items oi
+             JOIN products p ON p.id = oi.product_id
+             WHERE oi.order_id = ? AND p.is_returnable = 1'
+        );
+        $q->execute([$orderId]);
+        return (int) $q->fetchColumn() > 0;
     }
 
     /** Place a Cash-on-Delivery order directly. */

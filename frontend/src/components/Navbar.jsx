@@ -110,9 +110,6 @@ export default function Navbar() {
           </form>
 
           <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2 md:ml-2">
-            <button onClick={toggle} className="rounded-full p-2 hover:bg-gold/10" aria-label="theme">
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
             <Link to="/wishlist" className="relative rounded-full p-2 hover:bg-gold/10" aria-label="wishlist">
               <Heart size={20} />
               {wishCount > 0 && <Badge>{wishCount}</Badge>}

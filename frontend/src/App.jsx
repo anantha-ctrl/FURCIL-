@@ -32,6 +32,8 @@ const About = lazy(() => import('./pages/static/About'));
 const Contact = lazy(() => import('./pages/static/Contact'));
 const Privacy = lazy(() => import('./pages/static/Privacy'));
 const Terms = lazy(() => import('./pages/static/Terms'));
+const Returns = lazy(() => import('./pages/static/Returns'));
+const Shipping = lazy(() => import('./pages/static/Shipping'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Admin (split into its own chunks — Recharts only loads here)
@@ -116,6 +118,8 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/returns" element={<Returns />} />
+          <Route path="/shipping" element={<Shipping />} />
 
           {/* Cashier — billing counter only */}
           <Route path="/cashier" element={<ProtectedRoute roles={['cashier', 'admin']}><CashierLayout /></ProtectedRoute>} />

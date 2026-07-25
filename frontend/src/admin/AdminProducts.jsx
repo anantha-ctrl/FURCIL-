@@ -22,9 +22,10 @@ export default function AdminProducts() {
   // ---- CSV bulk upload ----
   const downloadTemplate = () =>
     exportCsv('products-template', [{
-      name: 'Sample Cotton Shirt', category: 'Men', brand: 'Cloud Label',
-      price: '1499', mrp: '1999', stock: '25', low_stock_alert: '5',
-      description: 'Soft breathable cotton shirt.', image: 'https://example.com/shirt.jpg', active: 'yes',
+      name: 'Superfood Meal Enhancer', category: 'Pet Wellness', brand: 'FURCIL',
+      price: '899', mrp: '999', stock: '25', low_stock_alert: '5',
+      description: 'Natural nutrition topper for dogs & cats.',
+      image: 'https://example.com/topper.jpg', active: 'yes', returnable: 'yes',
     }]);
 
   const onFilePicked = async (e) => {
@@ -76,6 +77,7 @@ export default function AdminProducts() {
     exportCsv('products', products.map((p) => ({
       id: p.id, name: p.name, brand: p.brand, category: p.category,
       price: p.price, mrp: p.mrp, stock: p.stock, sold: p.sold_count, active: p.is_active ? 'yes' : 'no',
+      returnable: Number(p.is_returnable) ? 'yes' : 'no',
     })));
 
   // Generate every product's QR onto ONE printable sheet — no downloading one
@@ -181,9 +183,15 @@ export default function AdminProducts() {
                 <td className="font-semibold">{inr(p.price)}</td>
                 <td><span className={p.stock <= 5 ? 'text-rose-500' : ''}>{p.stock}</span></td>
                 <td>
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${p.is_active ? 'bg-emerald-500/15 text-emerald-500' : 'bg-gray-500/15 text-gray-400'}`}>
-                    {p.is_active ? 'Active' : 'Hidden'}
-                  </span>
+                  <div className="flex flex-col items-start gap-1">
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${p.is_active ? 'bg-emerald-500/15 text-emerald-500' : 'bg-gray-500/15 text-gray-400'}`}>
+                      {p.is_active ? 'Active' : 'Hidden'}
+                    </span>
+                    {/* Returnable flag at a glance (green = can return, rose = can't). */}
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${Number(p.is_returnable) ? 'bg-sky-500/15 text-sky-500' : 'bg-rose-500/15 text-rose-500'}`}>
+                      {Number(p.is_returnable) ? 'Returnable' : 'No return'}
+                    </span>
+                  </div>
                 </td>
                 <td>
                   <div className="flex gap-1">

@@ -251,9 +251,6 @@ export default function AdminLayout() {
               View Store
             </Link>
             <NotificationBell />
-            <button onClick={toggle} className="rounded-full p-2 hover:bg-gold/10" aria-label="theme">
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
             <div className="relative pl-1" ref={menuRef}>
               <button onClick={() => setMenuOpen((o) => !o)}
                 className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition hover:bg-gold/10">

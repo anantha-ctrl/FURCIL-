@@ -300,7 +300,7 @@ class ProductController
                 $row[$f] = (float) $row[$f];
             }
         }
-        foreach (['id', 'stock', 'rating_count', 'sold_count', 'category_id'] as $f) {
+        foreach (['id', 'stock', 'rating_count', 'sold_count', 'category_id', 'is_returnable'] as $f) {
             if (isset($row[$f])) {
                 $row[$f] = (int) $row[$f];
             }

@@ -25,6 +25,10 @@ class ReturnController
         if ($order['status'] !== 'delivered') {
             Response::error('Only delivered orders can be returned', 400);
         }
+        // Block returns when none of the order's products are returnable.
+        if (!OrderController::orderHasReturnable($db, $orderId)) {
+            Response::error('This order contains only non-returnable products, so it cannot be returned.', 400);
+        }
 
         $ex = $db->prepare('SELECT id FROM returns WHERE order_id=?');
         $ex->execute([$orderId]);
