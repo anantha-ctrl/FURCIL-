@@ -331,7 +331,7 @@ Edit `backend/.env`:
 > order confirmation / status-update emails are sent for real over STARTTLS (raw-socket mailer,
 > no PHPMailer dependency). Keep your App Password out of any public commit — rotate it if leaked.
 | `CLOUDINARY_*` | Image uploads (optional — falls back to provided URLs) |
-| `RAZORPAY_*` | Payment gateway — **now wired into checkout** (Card/UPI/Netbanking). Empty keys = **test mode** (order placed, no real charge). See **[RAZORPAY_SETUP.md](RAZORPAY_SETUP.md)** for the full step-by-step key setup |
+| `RAZORPAY_*` | Payment gateway — **wired into checkout** (Card/UPI/Netbanking) and **currently running with LIVE keys** (`rzp_live_…`) verified against the Razorpay API — **real charges apply**. Empty keys fall back to **test mode** (order placed, no real charge); `rzp_test_…` keys run the sandbox. See **[RAZORPAY_SETUP.md](RAZORPAY_SETUP.md)** for the full step-by-step key setup |
 | `GOOGLE_CLIENT_ID` | Google Sign-In (optional). Must match `VITE_GOOGLE_CLIENT_ID` in `frontend/.env`. Without it the button shows a "not configured" message |
 | `CRON_KEY` | Shared secret for the token-gated mail-automation runner. Point Windows Task Scheduler / cron at `…/api/cron/run?key=CRON_KEY` (e.g. every 15 min). Empty = the cron endpoint is disabled; use the admin **Run due now** button instead |
 
@@ -347,7 +347,7 @@ Edit `backend/.env`:
 ### Graceful fallbacks (so the app works out-of-the-box)
 - **No SMTP?** OTP & reset emails are written to `backend/storage/mail.log`.
 - **No Cloudinary?** Image URLs you paste are stored directly.
-- **No Razorpay?** Checkout runs in test mode and completes the order so the full flow is demoable.
+- **No Razorpay?** Checkout runs in test mode and completes the order so the full flow is demoable. *(This project currently has **LIVE** Razorpay keys configured — payments are real.)*
 
 ---
 
@@ -499,7 +499,8 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for production deployment.
 
 ## 🆕 What's New (post-launch updates)
 
-### 🐾 Latest wave — per-product returnable flag, mail automation, sequential order numbers & a total-based payment rule
+### 🐾 Latest wave — live Razorpay payments, per-product returnable flag, mail automation, sequential order numbers & a total-based payment rule
+- **Razorpay LIVE payments enabled** — real `rzp_live_…` keys are now configured in `backend/.env` and were **verified against the Razorpay API** (auth OK, order-create succeeds — no charge until a customer actually pays). The full path is wired end-to-end: server creates the Razorpay order and returns the **key id** to the client (never hardcoded), the hosted checkout opens, and the **signature is verified server-side** before the order is marked paid + stock committed. **Real money now moves on checkout** — switch to `rzp_test_…` keys for sandbox testing. Keys live only in the gitignored `.env`.
 - **Per-product returnable flag** — each product now carries an admin-set **Returnable** toggle (`products.is_returnable`, default yes — migration 034). Turn it off for items that can't be returned (opened food, hygiene products). It shows end-to-end from live DB data: a **Returnable / No-return chip** in the admin product list, a **Returnable / Non-returnable badge** on the storefront product page, and a **`returnable` column** in the CSV template + bulk import. Returns are gated both in the UI (the "Request Return" button is hidden and a "Not returnable" note shown) **and on the server** — a return request is rejected when an order contains only non-returnable products; mixed orders (at least one returnable item) can still be returned.
 - **Mail Automation drip** — a full lifecycle email sequence anchored to order events: order-confirmation (on placement) → **welcome** + **product feeding guide** (on delivery) → **2-week check-in** → **review request with the customer's referral code** (+20 days) → **reorder reminder** (+27 days). New **Admin → Automation** console: per-step enable toggle + offset-days, KPIs (sent/pending/due/failed), a **live queue log**, and a **Run due now** button. A token-gated **`/api/cron/run?key=`** endpoint lets Windows Task Scheduler / cron send due mail hands-free. Sends through the real SMTP mailer (migration 032, `email_automations` table).
 - **Sequential order numbers** — online orders switched from the random `CF……` format to clean, brand-prefixed **`FUR00001`, `FUR00002`…** generated race-safely inside the order transaction. Prefix is admin-editable (`order_prefix`); existing demo orders were renumbered in place (migration 033).
