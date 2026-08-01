@@ -90,8 +90,12 @@ export default function ProductDetails() {
     try {
       await api.post(`/api/products/${product.id}/reviews`, reviewForm);
       toast.success('Review submitted');
-      const x = await api.get(`/api/products/${product.id}/reviews`);
+      const [x, p] = await Promise.all([
+        api.get(`/api/products/${product.id}/reviews`),
+        api.get(`/api/products/${slug}`)
+      ]);
       setReviews(x.data.data);
+      if (p.data?.data) setProduct(p.data.data);
       setReviewForm({ rating: 5, title: '', comment: '' });
     } catch (err) { toast.error(err.message); }
   };

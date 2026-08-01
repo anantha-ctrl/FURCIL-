@@ -19,6 +19,7 @@ class Database
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_EMULATE_PREPARES   => false,
                 ]);
+                self::ensureSchema();
             } catch (PDOException $e) {
                 http_response_code(500);
                 echo json_encode(['success' => false, 'message' => 'Database connection failed']);
@@ -26,5 +27,20 @@ class Database
             }
         }
         return self::$pdo;
+    }
+
+    private static function ensureSchema(): void
+    {
+        static $checked = false;
+        if ($checked) return;
+        $checked = true;
+        try {
+            self::$pdo->exec("ALTER TABLE product_images MODIFY image_url MEDIUMTEXT NOT NULL");
+            self::$pdo->exec("ALTER TABLE categories MODIFY image_url MEDIUMTEXT NULL");
+            self::$pdo->exec("ALTER TABLE banners MODIFY image_url MEDIUMTEXT NOT NULL");
+            self::$pdo->exec("ALTER TABLE settings MODIFY value MEDIUMTEXT NOT NULL");
+        } catch (\Throwable $t) {
+            // Ignore if tables don't exist yet or column modifications are restricted
+        }
     }
 }

@@ -9,15 +9,15 @@ class AdminDashboardController
         // ── Batch 1: Core KPIs in a single query via conditional aggregation ──
         $kpi = $db->query("
             SELECT
-                -- Online revenue & orders
-                COALESCE(SUM(CASE WHEN payment_status='paid' AND status<>'cancelled' THEN total ELSE 0 END),0)       AS online_sales,
+                -- Revenue & orders excluding cancelled
+                COALESCE(SUM(CASE WHEN status<>'cancelled' THEN total ELSE 0 END),0)                                AS online_sales,
                 COUNT(*)                                                                                              AS total_orders,
-                COALESCE(SUM(CASE WHEN payment_status='paid' AND status<>'cancelled' AND DATE(placed_at)=CURDATE() THEN total ELSE 0 END),0) AS today_online,
+                COALESCE(SUM(CASE WHEN status<>'cancelled' AND DATE(placed_at)=CURDATE() THEN total ELSE 0 END),0)    AS today_online,
                 SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END)                                                    AS pending_orders,
-                SUM(CASE WHEN payment_status='paid' AND status<>'cancelled' THEN 1 ELSE 0 END)                        AS paid_orders,
+                SUM(CASE WHEN status<>'cancelled' THEN 1 ELSE 0 END)                                                 AS paid_orders,
                 -- Previous period comparisons (prior 7 days vs current 7 days)
-                COALESCE(SUM(CASE WHEN payment_status='paid' AND status<>'cancelled' AND placed_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN total ELSE 0 END),0) AS online_7d,
-                COALESCE(SUM(CASE WHEN payment_status='paid' AND status<>'cancelled' AND placed_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY) AND placed_at < DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN total ELSE 0 END),0) AS online_prev_7d,
+                COALESCE(SUM(CASE WHEN status<>'cancelled' AND placed_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN total ELSE 0 END),0) AS online_7d,
+                COALESCE(SUM(CASE WHEN status<>'cancelled' AND placed_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY) AND placed_at < DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN total ELSE 0 END),0) AS online_prev_7d,
                 SUM(CASE WHEN placed_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 ELSE 0 END)                    AS orders_7d,
                 SUM(CASE WHEN placed_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY) AND placed_at < DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS orders_prev_7d
             FROM orders
@@ -60,7 +60,7 @@ class AdminDashboardController
         $conversionRate = $totalCustomers > 0 ? round(($paidOrders / $totalCustomers) * 100, 1) : 0;
 
         // Trend deltas (percentage change current vs previous 7 days)
-        $salesCur  = (float) $kpi['online_7d'] + (float) $bill['counter_sales']; // simplified: counter for period
+        $salesCur  = (float) $kpi['online_7d'] + (float) $bill['counter_sales'];
         $salesPrev = (float) $kpi['online_prev_7d'];
         $saleTrend = $salesPrev > 0 ? round((($salesCur - $salesPrev) / $salesPrev) * 100, 1) : ($salesCur > 0 ? 100 : 0);
 
@@ -80,7 +80,7 @@ class AdminDashboardController
         }
         foreach ($db->query(
             "SELECT DATE_FORMAT(placed_at,'%Y-%m') AS m,
-                    SUM(CASE WHEN payment_status='paid' AND status<>'cancelled' THEN total ELSE 0 END) AS rev,
+                    SUM(CASE WHEN status<>'cancelled' THEN total ELSE 0 END) AS rev,
                     COUNT(*) AS ords
              FROM orders WHERE placed_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) GROUP BY m"
         )->fetchAll() as $r) {
@@ -116,7 +116,7 @@ class AdminDashboardController
              JOIN (
                  SELECT oi.product_id AS pid, SUM(oi.quantity) AS units, SUM(oi.line_total) AS rev
                    FROM order_items oi JOIN orders o ON o.id=oi.order_id
-                   WHERE o.payment_status='paid' AND o.status<>'cancelled' GROUP BY oi.product_id
+                   WHERE o.status<>'cancelled' GROUP BY oi.product_id
                  UNION ALL
                  SELECT bi.product_id AS pid, SUM(bi.quantity) AS units, SUM(bi.line_total) AS rev
                    FROM bill_items bi JOIN bills b ON b.id=bi.bill_id
@@ -131,7 +131,7 @@ class AdminDashboardController
              WHERE role='customer' ORDER BY created_at DESC LIMIT 5"
         )->fetchAll();
 
-        // ── Activity feed — last 10 events from orders, customers, reviews ──
+        // ── Activity feed — last 10 events from orders, customers, reviews, messages ──
         $activity = $db->query("
             (SELECT 'order' AS type,
                     CONCAT('New order ', order_number) AS title,
@@ -153,6 +153,12 @@ class AdminDashboardController
              JOIN users u ON u.id = r.user_id
              JOIN products p ON p.id = r.product_id
              ORDER BY r.created_at DESC LIMIT 2)
+            UNION ALL
+            (SELECT 'message' AS type,
+                    CONCAT('Message from ', name) AS title,
+                    subject AS description,
+                    created_at AS time
+             FROM contact_messages ORDER BY created_at DESC LIMIT 2)
             ORDER BY time DESC
             LIMIT 10
         ")->fetchAll();

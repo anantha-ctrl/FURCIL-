@@ -53,9 +53,13 @@ export default function AdminProducts() {
 
   const remove = async (id) => {
     if (!confirm('Delete this product?')) return;
-    await api.delete(`/api/admin/products/${id}`);
-    toast.success('Product deleted');
-    load();
+    try {
+      await api.delete(`/api/admin/products/${id}`);
+      toast.success('Product deleted');
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Could not delete product');
+    }
   };
 
   const bulk = async (action) => {

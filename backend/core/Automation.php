@@ -72,6 +72,11 @@ class Automation
                 $when->format('Y-m-d H:i:s'), 'pending',
             ]);
         }
+
+        // Instantly process any items that are due right now (0-day offsets)
+        try {
+            self::runDue();
+        } catch (\Throwable $t) {}
     }
 
     /** Record an already-sent email (e.g. order_confirmation) so it shows in the log. */

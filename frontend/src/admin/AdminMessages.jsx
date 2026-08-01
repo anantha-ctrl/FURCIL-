@@ -11,15 +11,31 @@ export default function AdminMessages() {
   const load = () => api.get('/api/admin/messages').then((r) => setData(r.data.data)).catch(() => setData({ messages: [], unread: 0 }));
   useEffect(() => { load(); }, []);
 
+  // Poll for new messages every 15s in real time
+  useEffect(() => {
+    const timer = setInterval(load, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
   const setRead = async (m, read) => {
-    try { await api.put(`/api/admin/messages/${m.id}`, { is_read: read ? 1 : 0 }); load(); }
-    catch (e) { toast.error(e.message); }
+    try {
+      await api.put(`/api/admin/messages/${m.id}`, { is_read: read ? 1 : 0 });
+      toast.success(read ? 'Marked as read' : 'Marked as unread');
+      load();
+    } catch (e) {
+      toast.error(e.message || 'Could not update message');
+    }
   };
 
   const del = async (id) => {
     if (!confirm('Delete this message?')) return;
-    try { await api.delete(`/api/admin/messages/${id}`); toast.success('Message deleted'); load(); }
-    catch (e) { toast.error(e.message); }
+    try {
+      await api.delete(`/api/admin/messages/${id}`);
+      toast.success('Message deleted');
+      load();
+    } catch (e) {
+      toast.error(e.message || 'Could not delete message');
+    }
   };
 
   if (!data) return <Spinner />;

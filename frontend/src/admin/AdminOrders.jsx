@@ -149,15 +149,36 @@ function OrderRow({ o, onSaved, onReview }) {
   const [tracking, setTracking] = useState(o.tracking_number || '');
   const [saving, setSaving] = useState(false);
 
-  const dirty = status !== o.status || carrier !== (o.carrier || '') || tracking !== (o.tracking_number || '');
+  useEffect(() => {
+    setStatus(o.status);
+    setCarrier(o.carrier || '');
+    setTracking(o.tracking_number || '');
+  }, [o.status, o.carrier, o.tracking_number]);
 
-  const save = async () => {
+  const trackingDirty = carrier !== (o.carrier || '') || tracking !== (o.tracking_number || '');
+
+  const handleStatusChange = async (newStatus) => {
+    setStatus(newStatus);
+    try {
+      await api.put(`/api/admin/orders/${o.id}/status`, { status: newStatus, carrier, tracking_number: tracking });
+      toast.success(`Order ${o.order_number} set to ${newStatus}`);
+      onSaved();
+    } catch (err) {
+      toast.error(err.message || 'Failed to update order status');
+    }
+  };
+
+  const saveTracking = async () => {
     setSaving(true);
     try {
       await api.put(`/api/admin/orders/${o.id}/status`, { status, carrier, tracking_number: tracking });
-      toast.success('Order updated — customer notified');
+      toast.success('Shipment tracking updated');
       onSaved();
-    } catch (err) { toast.error(err.message); } finally { setSaving(false); }
+    } catch (err) {
+      toast.error(err.message || 'Failed to update tracking');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -177,15 +198,15 @@ function OrderRow({ o, onSaved, onReview }) {
             </button>
           )}
           {o.payment_method === 'upi' && o.payment_approval === 'rejected' && (
-            <button onClick={onReview} className="text-xs font-semibold text-rose-500 hover:underline">rejected · view</button>
+            <button onClick={onReview} className="text-xs font-semibold text-rose-500 hover:underline">rejected (unverified)</button>
           )}
-          {o.payment_method === 'upi' && o.payment_approval === 'approved' && (
+          {o.payment_method === 'upi' && o.payment_approval === 'approved' && o.payment_status === 'paid' && (
             <button onClick={onReview} className="text-xs text-emerald-500 hover:underline">verified · view</button>
           )}
         </div>
       </td>
       <td>
-        <select value={status} onChange={(e) => setStatus(e.target.value)}
+        <select value={status} onChange={(e) => handleStatusChange(e.target.value)}
           className={`input !w-auto !py-1 text-xs capitalize ${statusColor[status]}`}>
           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -199,10 +220,10 @@ function OrderRow({ o, onSaved, onReview }) {
             <input value={tracking} onChange={(e) => setTracking(e.target.value)} placeholder="Tracking #"
               className="input !w-full !py-1 text-xs" />
           </div>
-          {dirty && (
-            <button onClick={save} disabled={saving}
+          {trackingDirty && (
+            <button onClick={saveTracking} disabled={saving}
               className="mt-0.5 flex items-center justify-center gap-1 rounded-lg bg-gold px-2 py-1 text-xs font-semibold text-ink disabled:opacity-50">
-              <Check size={13} /> {saving ? 'Saving…' : 'Save & notify'}
+              <Check size={13} /> {saving ? 'Saving…' : 'Save tracking'}
             </button>
           )}
         </div>

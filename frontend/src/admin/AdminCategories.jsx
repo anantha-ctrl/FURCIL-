@@ -37,7 +37,16 @@ export default function AdminCategories() {
   };
 
   const edit = (c) => { setForm({ id: c.id, name: c.name, description: c.description || '', image_url: c.image_url || '', parent_id: c.parent_id || '', is_active: c.is_active }); setShow(true); };
-  const del = async (id) => { if (!confirm('Delete category? Products in it will be removed.')) return; await api.delete(`/api/admin/categories/${id}`); toast.success('Deleted'); load(); };
+  const del = async (id) => {
+    if (!confirm('Delete category? Products in it will be removed.')) return;
+    try {
+      await api.delete(`/api/admin/categories/${id}`);
+      toast.success('Deleted');
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Could not delete category');
+    }
+  };
 
   if (!cats) return <Spinner />;
 

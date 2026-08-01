@@ -47,14 +47,14 @@ export default function BrandIntro({ image }) {
             </div>
           </Tilt3D>
           {/* floating accent card */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             transition={{ delay: 0.4, duration: 0.7 }}
             className="absolute -bottom-6 -left-4 rounded-luxe bg-white/80 p-5 backdrop-blur-xl shadow-luxe-sm dark:bg-ink-soft/90 sm:-left-8"
           >
             <p className="font-display text-lg text-luxe-ink dark:text-white">Slow-made</p>
             <p className="text-sm text-luxe-ink/50 dark:text-white/50">Crafted, not churned</p>
-          </motion.div>
+          </motion.div> */}
         </Reveal>
       </div>
     </section>

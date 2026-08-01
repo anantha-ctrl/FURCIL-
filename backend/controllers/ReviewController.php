@@ -33,16 +33,8 @@ class ReviewController
 
         $db = db();
 
-        // Only customers whose order for this product has been DELIVERED may
-        // review it (verified, post-delivery reviews).
-        $bought = $db->prepare(
-            "SELECT 1 FROM order_items oi JOIN orders o ON o.id = oi.order_id
-             WHERE o.user_id = ? AND oi.product_id = ? AND o.status = 'delivered' LIMIT 1"
-        );
-        $bought->execute([$userId, $productId]);
-        if (!$bought->fetch()) {
-            Response::error('You can review a product only after it has been delivered', 403);
-        }
+        // Post review - logged-in users can write a review.
+        // Verified purchase badge is automatically calculated based on delivered order status.
 
         try {
             $db->prepare(

@@ -65,7 +65,36 @@ class AddressController
 
     public function destroy(array $p): void
     {
-        db()->prepare('DELETE FROM addresses WHERE id=? AND user_id=?')->execute([(int) $p['id'], Auth::id()]);
-        Response::success(null, 'Address removed');
+        $userId = Auth::id();
+        $id = (int) $p['id'];
+        $db = db();
+
+        $stmt = $db->prepare('SELECT is_default FROM addresses WHERE id=? AND user_id=?');
+        $stmt->execute([$id, $userId]);
+        $addr = $stmt->fetch();
+        if (!$addr) {
+            Response::error('Address not found', 404);
+        }
+
+        try {
+            // Unlink any orders referencing this address so foreign key constraints don't block deletion
+            $db->prepare('UPDATE orders SET address_id=NULL WHERE address_id=?')->execute([$id]);
+
+            // Delete the address
+            $db->prepare('DELETE FROM addresses WHERE id=? AND user_id=?')->execute([$id, $userId]);
+
+            // If the deleted address was default, make the latest remaining address default
+            if (!empty($addr['is_default'])) {
+                $first = $db->prepare('SELECT id FROM addresses WHERE user_id=? ORDER BY id DESC LIMIT 1');
+                $first->execute([$userId]);
+                if ($nextId = $first->fetchColumn()) {
+                    $db->prepare('UPDATE addresses SET is_default=1 WHERE id=?')->execute([$nextId]);
+                }
+            }
+
+            Response::success(null, 'Address removed');
+        } catch (PDOException $e) {
+            Response::error('Could not delete address', 400);
+        }
     }
 }

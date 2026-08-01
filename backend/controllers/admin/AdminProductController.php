@@ -86,8 +86,27 @@ class AdminProductController
     public function destroy(array $p): void
     {
         Auth::admin();
-        db()->prepare('DELETE FROM products WHERE id=?')->execute([(int) $p['id']]);
-        Response::success(null, 'Product deleted');
+        $id = (int) $p['id'];
+        $db = db();
+        try {
+            // Nullify product_id in order_items so historical orders retain item info without FK conflicts
+            $db->prepare('UPDATE order_items SET product_id=NULL WHERE product_id=?')->execute([$id]);
+
+            // Clean up related child tables
+            $db->prepare('DELETE FROM product_images WHERE product_id=?')->execute([$id]);
+            $db->prepare('DELETE FROM product_variants WHERE product_id=?')->execute([$id]);
+            $db->prepare('DELETE FROM reviews WHERE product_id=?')->execute([$id]);
+            $db->prepare('DELETE FROM wishlist WHERE product_id=?')->execute([$id]);
+            $db->prepare('DELETE FROM cart WHERE product_id=?')->execute([$id]);
+            $db->prepare('DELETE FROM recently_viewed WHERE product_id=?')->execute([$id]);
+
+            // Delete the product
+            $db->prepare('DELETE FROM products WHERE id=?')->execute([$id]);
+
+            Response::success(null, 'Product deleted');
+        } catch (PDOException $e) {
+            Response::error('Could not delete product: ' . $e->getMessage(), 400);
+        }
     }
 
     /** Bulk activate / deactivate / delete by ids. */
@@ -100,12 +119,24 @@ class AdminProductController
         if (!$ids) {
             Response::error('No products selected', 422);
         }
+        $db = db();
         $in = implode(',', array_fill(0, count($ids), '?'));
         if ($action === 'delete') {
-            db()->prepare("DELETE FROM products WHERE id IN ($in)")->execute($ids);
+            try {
+                $db->prepare("UPDATE order_items SET product_id=NULL WHERE product_id IN ($in)")->execute($ids);
+                $db->prepare("DELETE FROM product_images WHERE product_id IN ($in)")->execute($ids);
+                $db->prepare("DELETE FROM product_variants WHERE product_id IN ($in)")->execute($ids);
+                $db->prepare("DELETE FROM reviews WHERE product_id IN ($in)")->execute($ids);
+                $db->prepare("DELETE FROM wishlist WHERE product_id IN ($in)")->execute($ids);
+                $db->prepare("DELETE FROM cart WHERE product_id IN ($in)")->execute($ids);
+                $db->prepare("DELETE FROM recently_viewed WHERE product_id IN ($in)")->execute($ids);
+                $db->prepare("DELETE FROM products WHERE id IN ($in)")->execute($ids);
+            } catch (PDOException $e) {
+                Response::error('Could not delete selected products', 400);
+            }
         } elseif ($action === 'activate' || $action === 'deactivate') {
             $val = $action === 'activate' ? 1 : 0;
-            db()->prepare("UPDATE products SET is_active=$val WHERE id IN ($in)")->execute($ids);
+            $db->prepare("UPDATE products SET is_active=$val WHERE id IN ($in)")->execute($ids);
         } else {
             Response::error('Invalid bulk action', 422);
         }

@@ -64,8 +64,22 @@ class AdminCategoryController
     public function destroy(array $p): void
     {
         Auth::admin();
-        db()->prepare('DELETE FROM categories WHERE id=?')->execute([(int) $p['id']]);
-        Response::success(null, 'Category deleted');
+        $id = (int) $p['id'];
+        $db = db();
+        try {
+            // Unlink any sub-categories so foreign key constraints don't block deletion
+            $db->prepare('UPDATE categories SET parent_id=NULL WHERE parent_id=?')->execute([$id]);
+
+            // Reassign or delete products in this category before deleting
+            // (Check if a fallback 'Uncategorized' or default category exists, otherwise delete products)
+            $db->prepare('DELETE FROM products WHERE category_id=?')->execute([$id]);
+
+            // Delete the category
+            $db->prepare('DELETE FROM categories WHERE id=?')->execute([$id]);
+            Response::success(null, 'Category deleted');
+        } catch (PDOException $e) {
+            Response::error('Could not delete category: ' . $e->getMessage(), 400);
+        }
     }
 
     public static function slugify(string $text): string

@@ -29,6 +29,7 @@ const ACTIVITY_ICON = {
   order:    { icon: ShoppingBag, color: 'text-blue-500',    bg: 'bg-blue-500/15' },
   customer: { icon: UserPlus,    color: 'text-emerald-500', bg: 'bg-emerald-500/15' },
   review:   { icon: Star,        color: 'text-amber-500',   bg: 'bg-amber-500/15' },
+  message:  { icon: Mail,        color: 'text-purple-500',  bg: 'bg-purple-500/15' },
 };
 
 // Greeting based on time of day
@@ -92,11 +93,9 @@ export default function Dashboard() {
 
   useEffect(() => { load(false); }, [load]);
 
-  // Keep the numbers live: poll every 30s, and refresh immediately whenever the
-  // admin returns to this tab (e.g. after ringing up a bill) or the network comes
-  // back — so a fresh sale shows up at once instead of waiting for the next poll.
+  // Keep the numbers live: poll every 15s, and refresh immediately whenever the admin returns to this tab
   useEffect(() => {
-    const t = setInterval(() => load(true), 30000);
+    const t = setInterval(() => load(true), 15000);
     const onVisible = () => { if (document.visibilityState === 'visible') load(true); };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('focus', onVisible);

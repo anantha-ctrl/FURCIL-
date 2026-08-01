@@ -132,7 +132,6 @@ export default function Navbar() {
                     <p className="px-3 py-2 font-semibold">{user.name}</p>
                     <Dropdown to="/profile">My Profile</Dropdown>
                     <Dropdown to="/orders">My Orders</Dropdown>
-                    <Dropdown to="/profile?tab=rewards">Rewards</Dropdown>
                     <Dropdown to="/wishlist">Wishlist</Dropdown>
                     {isAdmin && (
                       <Dropdown to="/admin"><span className="flex items-center gap-2"><LayoutDashboard size={14}/>Admin</span></Dropdown>
@@ -187,7 +186,6 @@ export default function Navbar() {
                   <ul className="space-y-1">
                     <DrawerLink to="/profile" close={() => setOpenMenu(false)}>My Profile</DrawerLink>
                     <DrawerLink to="/orders" close={() => setOpenMenu(false)}>My Orders</DrawerLink>
-                    <DrawerLink to="/profile?tab=rewards" close={() => setOpenMenu(false)}>Rewards</DrawerLink>
                     <DrawerLink to="/wishlist" close={() => setOpenMenu(false)}>Wishlist</DrawerLink>
                     {isAdmin && <DrawerLink to="/admin" close={() => setOpenMenu(false)}>Admin Dashboard</DrawerLink>}
                   </ul>

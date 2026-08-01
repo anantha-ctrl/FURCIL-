@@ -42,7 +42,6 @@ export default function LandingNav() {
       ['Profile', '/profile', User],
       ['My Orders', '/orders', Package],
       ['Wishlist', '/wishlist', Heart],
-      ['Rewards', '/profile?tab=rewards', Gift],
       ...(user.role === 'admin' ? [['Admin Panel', '/admin', LayoutDashboard]] : []),
     ]
     : [

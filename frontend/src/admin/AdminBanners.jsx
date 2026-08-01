@@ -35,7 +35,16 @@ export default function AdminBanners() {
   };
 
   const edit = (b) => { setForm(b); setShow(true); };
-  const del = async (id) => { if (!confirm('Delete banner?')) return; await api.delete(`/api/admin/banners/${id}`); toast.success('Deleted'); load(); };
+  const del = async (id) => {
+    if (!confirm('Delete banner?')) return;
+    try {
+      await api.delete(`/api/admin/banners/${id}`);
+      toast.success('Deleted');
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Could not delete banner');
+    }
+  };
 
   if (!banners) return <Spinner />;
 

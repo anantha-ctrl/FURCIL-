@@ -107,26 +107,34 @@ class AdminOrderController
     {
         Auth::admin();
         $id = (int) $p['id'];
-        $status = Request::input('status');
-        $carrier = trim((string) Request::input('carrier', '')) ?: null;
-        $tracking = trim((string) Request::input('tracking_number', '')) ?: null;
+        $data = Request::body();
+        $status = $data['status'] ?? null;
+        $carrier = isset($data['carrier']) ? trim((string) $data['carrier']) : null;
+        $tracking = isset($data['tracking_number']) ? trim((string) $data['tracking_number']) : null;
+
         $allowed = ['pending', 'processing', 'packed', 'shipped', 'delivered', 'cancelled'];
-        if (!in_array($status, $allowed, true)) {
+        if ($status !== null && !in_array($status, $allowed, true)) {
             Response::error('Invalid status', 422);
         }
         $db = db();
 
-        // Update status; set carrier/tracking when provided (e.g. on "shipped").
-        if ($carrier !== null || $tracking !== null) {
-            $db->prepare('UPDATE orders SET status=?, carrier=?, tracking_number=? WHERE id=?')
-               ->execute([$status, $carrier, $tracking, $id]);
-        } else {
-            $db->prepare('UPDATE orders SET status=? WHERE id=?')->execute([$status, $id]);
+        $currStmt = $db->prepare('SELECT * FROM orders WHERE id=?');
+        $currStmt->execute([$id]);
+        $curr = $currStmt->fetch();
+        if (!$curr) {
+            Response::error('Order not found', 404);
         }
-        if ($status === 'delivered') {
+
+        $newStatus = $status !== null ? $status : $curr['status'];
+        $newCarrier = $carrier !== null ? $carrier : $curr['carrier'];
+        $newTracking = $tracking !== null ? $tracking : $curr['tracking_number'];
+
+        $db->prepare('UPDATE orders SET status=?, carrier=?, tracking_number=? WHERE id=?')
+           ->execute([$newStatus, $newCarrier, $newTracking, $id]);
+
+        if ($newStatus === 'delivered') {
             $db->prepare("UPDATE orders SET payment_status='paid' WHERE id=? AND payment_method='cod'")->execute([$id]);
-            // Kick off the post-delivery mail drip (welcome, feeding guide, check-in, review, reorder).
-            Automation::onDelivered($id);
+            try { Automation::onDelivered($id); } catch (\Throwable $e) {}
         }
 
         // Notify the customer by email about the status change.
@@ -135,12 +143,14 @@ class AdminOrderController
              FROM orders o JOIN users u ON u.id=o.user_id WHERE o.id=?'
         );
         $info->execute([$id]);
-        if ($row = $info->fetch()) {
-            Mailer::send(
-                $row['email'],
-                Mailer::brand() . " · Order {$row['order_number']} update",
-                Mailer::orderStatusTemplate($row['name'], $row['order_number'], $status, $row['carrier'], $row['tracking_number'])
-            );
+        if ($row = $info->fetch() && !empty($row['email'])) {
+            try {
+                Mailer::send(
+                    $row['email'],
+                    Mailer::brand() . " · Order {$row['order_number']} update",
+                    Mailer::orderStatusTemplate($row['name'], $row['order_number'], $newStatus, $row['carrier'], $row['tracking_number'])
+                );
+            } catch (\Throwable $e) {}
         }
 
         Response::success(null, 'Order status updated');

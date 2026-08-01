@@ -27,7 +27,7 @@ export default function NewArrival({ image }) {
           Just landed
         </motion.p>
         <h2 className="max-w-4xl font-display text-[12vw] font-bold leading-[0.9] sm:text-7xl lg:text-8xl">
-          <MaskReveal lines={['The New', 'Arrival Edit']} />
+          <MaskReveal lines={['The New Arrival']} />
         </h2>
         <motion.p
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}

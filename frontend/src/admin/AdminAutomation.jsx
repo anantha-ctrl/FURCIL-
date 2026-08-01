@@ -26,12 +26,27 @@ export default function AdminAutomation() {
   const [saving, setSaving] = useState(false);
   const [running, setRunning] = useState(false);
 
-  const load = () => api.get('/api/admin/automation').then((r) => setData(r.data.data)).catch(() => toast.error('Failed to load'));
+  const load = () => api.get('/api/admin/automation').then((r) => setData(r.data.data)).catch(() => {});
   useEffect(() => { load(); }, []);
+
+  // Poll real-time automation queue stats & activity log every 10s
+  useEffect(() => {
+    const timer = setInterval(load, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (!data) return <Spinner />;
 
-  const setMaster = (v) => setData((d) => ({ ...d, master_enabled: v }));
+  const toggleMaster = async (v) => {
+    setData((d) => ({ ...d, master_enabled: v }));
+    try {
+      await api.put('/api/admin/automation', { master_enabled: v });
+      toast.success(`Automation turned ${v ? 'On' : 'Off'}`);
+      load();
+    } catch (e) {
+      toast.error(e.message || 'Could not update toggle');
+    }
+  };
   const setStep = (type, key, val) =>
     setData((d) => ({ ...d, steps: d.steps.map((s) => (s.type === type ? { ...s, [key]: val } : s)) }));
 
@@ -74,7 +89,7 @@ export default function AdminAutomation() {
         </div>
         <div className="flex items-center gap-3">
           <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <Checkbox checked={data.master_enabled} onChange={(e) => setMaster(e.target.checked)} />
+            <Checkbox checked={data.master_enabled} onChange={(e) => toggleMaster(e.target.checked)} />
             Automation {data.master_enabled ? 'On' : 'Off'}
           </label>
           <button onClick={runNow} disabled={running} className="btn-outline flex items-center gap-2 !py-2">

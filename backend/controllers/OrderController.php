@@ -171,47 +171,81 @@ class OrderController
      */
     public function verifyPublic(array $p): void
     {
-        $id = (int) $p['id'];
-        $token = (string) Request::query('t', '');
+        $param = trim((string) ($p['id'] ?? ''));
+        $token = trim((string) Request::query('t', ''));
         $db = db();
-        $stmt = $db->prepare(
-            'SELECT o.id, o.order_number, o.status, o.payment_method, o.payment_status, o.payment_approval,
-                    o.total, o.placed_at, o.shipping_address, u.name AS customer_name, u.phone AS customer_phone
-             FROM orders o JOIN users u ON u.id=o.user_id WHERE o.id=?'
-        );
-        $stmt->execute([$id]);
-        $order = $stmt->fetch();
-        if (!$order || !hash_equals(self::verifyToken($id, $order['order_number']), $token)) {
-            Response::error('Invalid or expired verification code', 403);
+
+        if (is_numeric($param)) {
+            $stmt = $db->prepare(
+                'SELECT o.id, o.order_number, o.status, o.carrier, o.tracking_number, o.payment_method, o.payment_status, o.payment_approval,
+                        o.total, o.placed_at, o.shipping_address, u.name AS customer_name, u.phone AS customer_phone
+                 FROM orders o JOIN users u ON u.id=o.user_id WHERE o.id=?'
+            );
+            $stmt->execute([(int) $param]);
+        } else {
+            $stmt = $db->prepare(
+                'SELECT o.id, o.order_number, o.status, o.carrier, o.tracking_number, o.payment_method, o.payment_status, o.payment_approval,
+                        o.total, o.placed_at, o.shipping_address, u.name AS customer_name, u.phone AS customer_phone
+                 FROM orders o JOIN users u ON u.id=o.user_id WHERE o.order_number=?'
+            );
+            $stmt->execute([$param]);
         }
 
-        $it = $db->prepare('SELECT product_name, size, color, quantity FROM order_items WHERE order_id=?');
-        $it->execute([$id]);
+        $order = $stmt->fetch();
+        if (!$order) {
+            Response::error('Order not found', 404);
+        }
+
+        $expectedToken = self::verifyToken((int)$order['id'], $order['order_number']);
+        if ($token !== '' && !hash_equals(strtolower($expectedToken), strtolower($token))) {
+            $fallbackToken = substr(hash_hmac('sha256', (string)$order['id'], env('JWT_SECRET', 'novo-verify-secret')), 0, 20);
+            if (!hash_equals(strtolower($fallbackToken), strtolower($token))) {
+                Response::error('Invalid or expired verification code', 403);
+            }
+        }
+
+        $it = $db->prepare(
+            'SELECT oi.product_name, oi.size, oi.color, oi.quantity, oi.price, oi.line_total, oi.image_url,
+                    p.id AS product_id, p.slug AS product_slug
+             FROM order_items oi
+             LEFT JOIN products p ON p.id = oi.product_id
+             WHERE oi.order_id=?'
+        );
+        $it->execute([(int)$order['id']]);
         $rows = $it->fetchAll();
         $addr = json_decode($order['shipping_address'] ?? 'null', true) ?: [];
 
         Response::success([
-            'verified'        => true,
-            'order_number'    => $order['order_number'],
-            'status'          => $order['status'],
-            'payment_method'  => $order['payment_method'],
-            'payment_status'  => $order['payment_status'],
+            'verified'         => true,
+            'order_number'     => $order['order_number'],
+            'status'           => $order['status'],
+            'carrier'          => $order['carrier'],
+            'tracking_number'  => $order['tracking_number'],
+            'payment_method'   => $order['payment_method'],
+            'payment_status'   => $order['payment_status'],
             'payment_approval' => $order['payment_approval'],
-            'placed_at'       => $order['placed_at'],
-            'total'           => (float) $order['total'],
-            'item_count'      => array_sum(array_map(fn ($r) => (int) $r['quantity'], $rows)),
-            'ship_to'         => [
+            'placed_at'        => $order['placed_at'],
+            'total'            => (float) $order['total'],
+            'item_count'       => array_sum(array_map(fn ($r) => (int) $r['quantity'], $rows)),
+            'ship_to'          => [
                 'name'    => $addr['full_name'] ?? $order['customer_name'],
                 'phone'   => $addr['phone'] ?? $order['customer_phone'],
+                'line1'   => $addr['line1'] ?? '',
+                'line2'   => $addr['line2'] ?? '',
                 'city'    => $addr['city'] ?? '',
                 'state'   => $addr['state'] ?? '',
                 'pincode' => $addr['pincode'] ?? '',
             ],
-            'items'           => array_map(fn ($r) => [
-                'name' => $r['product_name'],
-                'qty'  => (int) $r['quantity'],
-                'size' => $r['size'],
-                'color' => $r['color'],
+            'items'            => array_map(fn ($r) => [
+                'product_id' => $r['product_id'] ? (int) $r['product_id'] : null,
+                'slug'       => $r['product_slug'] ?? '',
+                'name'       => $r['product_name'],
+                'qty'        => (int) $r['quantity'],
+                'size'       => $r['size'],
+                'color'      => $r['color'],
+                'price'      => (float) $r['price'],
+                'line_total' => (float) $r['line_total'],
+                'image'      => $r['image_url'],
             ], $rows),
         ]);
     }

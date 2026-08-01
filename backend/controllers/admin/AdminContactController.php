@@ -23,11 +23,11 @@ class AdminContactController
     {
         Auth::admin();
         $id = (int) $p['id'];
-        $read = (int) (bool) (Request::body()['is_read'] ?? 1);
-        $ok = db()->prepare('UPDATE contact_messages SET is_read=? WHERE id=?')->execute([$read, $id]);
-        if (!$ok) {
-            Response::error('Message not found', 404);
-        }
+        $body = Request::body();
+        $read = isset($body['is_read']) ? (int) (bool) $body['is_read'] : 1;
+        $db = db();
+        $stmt = $db->prepare('UPDATE contact_messages SET is_read=? WHERE id=?');
+        $stmt->execute([$read, $id]);
         Response::success(['is_read' => $read], $read ? 'Marked as read' : 'Marked as unread');
     }
 
