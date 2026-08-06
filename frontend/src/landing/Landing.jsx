@@ -23,7 +23,13 @@ export default function Landing() {
 
   // Pull the live, admin-editable landing copy (falls back to built-in defaults).
   useEffect(() => {
-    api.get('/api/landing').then((r) => setContent(r.data.data)).catch(() => {});
+    let active = true;
+    const load = () => api.get('/api/landing').then((r) => {
+      if (active) setContent(r.data.data);
+    }).catch(() => {});
+    load();
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 15000);
+    return () => { active = false; clearInterval(timer); };
   }, []);
 
   const { scrollYProgress } = useScroll();

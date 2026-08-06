@@ -26,6 +26,14 @@ class MiscController
         self::streamImage($stmt->fetchColumn());
     }
 
+    /** GET /api/banners/{id}/image — stream a banner image outside the JSON payload. */
+    public function bannerImage(array $p): void
+    {
+        $stmt = db()->prepare('SELECT image_url FROM banners WHERE id=? AND is_active=1 LIMIT 1');
+        $stmt->execute([(int) ($p['id'] ?? 0)]);
+        self::streamImage($stmt->fetchColumn());
+    }
+
     /**
      * Serve an image reference as real binary (keeps list/search JSON tiny — heavy
      * admin-uploaded base64 images live here, cached, not embedded in every response).
@@ -193,6 +201,15 @@ class MiscController
             'SELECT id, title, subtitle, cta_label, cta_link, image_url
              FROM banners WHERE is_active = 1 ORDER BY sort_order, id'
         )->fetchAll();
+        $base = self::apiBase();
+        foreach ($rows as &$row) {
+            // Large base64 uploads must not block JSON parsing or carousel rendering.
+            // The browser loads them independently as cached image resources instead.
+            if (str_starts_with((string) $row['image_url'], 'data:')) {
+                $row['image_url'] = $base . '/api/banners/' . (int) $row['id'] . '/image';
+            }
+        }
+        unset($row);
         Response::success($rows);
     }
 

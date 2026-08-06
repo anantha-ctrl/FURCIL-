@@ -30,7 +30,7 @@ self.addEventListener('fetch', (e) => {
       cached ||
       fetch(request).then((res) => {
         const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(request, copy)).catch(() => {});
+        caches.open(CACHE).then((c) => c.put(request, copy)).catch(() => { });
         return res;
       }).catch(() => cached)
     )

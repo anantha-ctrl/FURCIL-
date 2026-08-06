@@ -276,12 +276,7 @@ mysql -u root -p < database/cloudfashion.sql
 # …or import database/cloudfashion.sql via phpMyAdmin (http://localhost/phpmyadmin)
 ```
 
-This creates the `cloudfashion` database with sample products, categories, and two accounts:
-
-| Role     | Email                       | Password   |
-|----------|-----------------------------|------------|
-| Admin    | `admin@furcil.com`    | `Admin@123`|
-| Customer | `customer@furcil.com` | `Test@123` |
+This creates the `cloudfashion` database with sample products and categories. Create and manage production accounts through the application; the login screen never exposes credentials.
 
 ### 2. Backend
 The project lives in `htdocs`, so Apache serves it automatically.
@@ -504,7 +499,7 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for production deployment.
 - **Admin Orders & Instant Status Sync** — order status dropdown changes (Pending → Processing → Packed → Shipped → Delivered / Cancelled) save to the MySQL database automatically upon selection with instant toast alerts and parent-state sync. Marking COD orders as `delivered` auto-settles payment status to `paid` and triggers immediate 0-day drip automation.
 - **Robust Admin CRUD & Data Safety** — widened `product_images.image_url`, `categories.image_url`, `banners.image_url`, and `settings.value` columns to `MEDIUMTEXT` in `Database::ensureSchema()` to prevent base64 data-URI truncation errors (`SQLSTATE[22001]`). Foreign key constraint protections added to category & product deletion routines to safely un-link order references and child tables without database crashes (`1451`).
 - **Profile Address Management Fix** — un-links historical `orders.address_id` foreign key references before address deletion, preventing MySQL foreign key restriction failures, and automatically reassigns default status to remaining addresses.
-- **Real-Time Admin Dashboard & Inbox Polling** — reduced dashboard polling interval to 15 seconds, merged online + counter sales while excluding cancelled orders, integrated contact form messages into the live Activity Feed timeline, and added 15s background polling to the Admin Messages console.
+- **Admin Dashboard & Inbox** — dashboard metrics merge online + counter sales while excluding cancelled orders, and contact-form messages appear in the Activity Feed. Dashboard data loads on entry and updates only with the visible manual Refresh control, so it never refreshes while an admin is working.
 - **Mail Automation Instant Triggering** — `Automation::onDelivered()` automatically executes `Automation::runDue()` upon order delivery so 0-day drip emails (`Welcome email` & `Feeding guide`) process immediately without requiring manual triggers, with 10s auto-polling on the Admin Automation console.
 - **Store Settings Base64 & Multi-Field Support** — all 36 store settings (brand logo, landing images, promo text, contact details, payment rules, UPI QR, and bank details) save directly to MySQL with instant storefront updates.
 - **Razorpay LIVE payments enabled** — real `rzp_live_…` keys are configured in `backend/.env` and verified against the Razorpay API. The full path is wired end-to-end: server creates the Razorpay order and returns the key id to the client, the hosted checkout opens, and the signature is verified server-side before the order is marked paid + stock committed.
@@ -526,7 +521,7 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for production deployment.
 - **Razorpay live checkout** — the gateway is now **wired into the frontend Checkout** (Card / UPI / Netbanking / Wallet): create-order → hosted modal → server-side signature verify → order confirmed. Falls back to **test mode** when keys are empty. Setup guide: **[RAZORPAY_SETUP.md](RAZORPAY_SETUP.md)**.
 - **Clean `/furcil` URL** — a filesystem **symlink** (`htdocs/furcil → htdocs/FURCIL™`) serves the folder at `/furcil` (avoids the ™ in URLs, no Apache alias/vhost needed); the API base and backend router derive the mount point dynamically.
 - **Admin tidy-up** — sidebar trimmed (Billing / Loyalty / Cashiers removed), **Settings** tab added; themed native `<select>` dropdowns; product form labels pet-ified; category-create empty-`parent_id` bug fixed.
-- **Demo logins** rebranded to `admin@furcil.com` / `customer@furcil.com` (passwords unchanged).
+- **Login security** — demo credentials are not displayed or prefilled on the login screen.
 
 ### Earlier wave — UPI/QR online payment, admin verification, invoice QR & customer export
 - **Invoice delivery-verification QR** — every printed online invoice now carries a QR that encodes a **signed link**; scanning it opens a **public verify page** (`/verify-order/:id`) showing the order, items, ship-to and status **live from the DB** so a courier can confirm the parcel. Token is an HMAC of the order id + number — tamper-proof, no enumeration. Backed by public `GET /api/orders/verify/{id}`.

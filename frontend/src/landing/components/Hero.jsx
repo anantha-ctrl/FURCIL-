@@ -23,9 +23,13 @@ export default function Hero({ content }) {
   const [slides, setSlides] = useState(null);
 
   useEffect(() => {
-    api.get('/api/banners')
-      .then((r) => setSlides(Array.isArray(r.data.data) ? r.data.data : []))
-      .catch(() => setSlides([]));
+    let active = true;
+    const load = () => api.get('/api/banners')
+      .then((r) => { if (active) setSlides(Array.isArray(r.data.data) ? r.data.data : []); })
+      .catch(() => { if (active) setSlides([]); });
+    load();
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 15000);
+    return () => { active = false; clearInterval(timer); };
   }, []);
 
   // Two or more banners → sliding carousel. Otherwise the editorial single hero.

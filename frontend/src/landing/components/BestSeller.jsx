@@ -17,9 +17,13 @@ export default function BestSeller() {
   const [quick, setQuick] = useState(null);
 
   useEffect(() => {
-    api.get('/api/products/best-sellers?limit=8')
-      .then((r) => setProducts(r.data.data))
-      .catch(() => setProducts([]));
+    let active = true;
+    const load = () => api.get('/api/products/best-sellers?limit=8')
+      .then((r) => { if (active) setProducts(r.data.data); })
+      .catch(() => { if (active) setProducts([]); });
+    load();
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 15000);
+    return () => { active = false; clearInterval(timer); };
   }, []);
 
   return (

@@ -9,7 +9,7 @@ import {
   IndianRupee, ShoppingCart, Users, Package, AlertTriangle, RefreshCw,
   TrendingUp, Clock, UserPlus, Receipt, Globe, Store,
   Plus, Eye, FileBarChart, ArrowUpRight, ArrowDownRight,
-  ShoppingBag, Star, Activity, Percent,
+  ShoppingBag, Star, Activity, Percent, Mail, Wifi, WifiOff,
 } from 'lucide-react';
 import api from '../api/client';
 import { inr, dateFmt, timeAgo, statusColor } from '../utils/format';
@@ -81,32 +81,27 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [connection, setConnection] = useState('connecting');
+  const requestRef = useRef(false);
 
-  const load = useCallback((silent) => {
-    if (!silent) setData(null);
+  const load = useCallback(() => {
+    if (requestRef.current) return Promise.resolve();
+    requestRef.current = true;
     setRefreshing(true);
     return api.get('/api/admin/dashboard')
-      .then((r) => { setData(r.data.data); setLastUpdated(new Date()); })
-      .catch(() => {})
-      .finally(() => setRefreshing(false));
+      .then((r) => {
+        setData(r.data.data);
+        setLastUpdated(new Date());
+        setConnection('live');
+      })
+      .catch(() => setConnection('offline'))
+      .finally(() => {
+        requestRef.current = false;
+        setRefreshing(false);
+      });
   }, []);
 
-  useEffect(() => { load(false); }, [load]);
-
-  // Keep the numbers live: poll every 15s, and refresh immediately whenever the admin returns to this tab
-  useEffect(() => {
-    const t = setInterval(() => load(true), 15000);
-    const onVisible = () => { if (document.visibilityState === 'visible') load(true); };
-    document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('focus', onVisible);
-    window.addEventListener('online', onVisible);
-    return () => {
-      clearInterval(t);
-      document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('focus', onVisible);
-      window.removeEventListener('online', onVisible);
-    };
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   // ── Skeleton state ──
   if (!data) {
@@ -138,7 +133,8 @@ export default function Dashboard() {
         name={user?.name}
         refreshing={refreshing}
         lastUpdated={lastUpdated}
-        onRefresh={() => load(false)}
+        connection={connection}
+        onRefresh={load}
         pendingOrders={cards.pending_orders}
         todaySales={cards.today_sales}
       />
@@ -208,7 +204,7 @@ export default function Dashboard() {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  * WELCOME BANNER
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function WelcomeBanner({ name, refreshing, lastUpdated, onRefresh, pendingOrders, todaySales }) {
+function WelcomeBanner({ name, refreshing, lastUpdated, connection, onRefresh, pendingOrders, todaySales }) {
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
@@ -226,11 +222,13 @@ function WelcomeBanner({ name, refreshing, lastUpdated, onRefresh, pendingOrders
             {greeting()}, <span className="text-gold">{name?.split(' ')[0] || 'Admin'}</span>
           </h1>
           <p className="mt-1 text-sm text-gray-400">{today}</p>
-          {lastUpdated && (
-            <p className="mt-0.5 text-xs text-gray-500">
-              Last updated: {timeAgo(lastUpdated.toISOString())}
-            </p>
-          )}
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+            <span className={`inline-flex items-center gap-1.5 ${connection === 'live' ? 'text-emerald-300' : connection === 'offline' ? 'text-rose-300' : 'text-gray-400'}`}>
+              {connection === 'live' ? <Wifi size={13} /> : <WifiOff size={13} />}
+              {connection === 'live' ? 'Live database connected' : connection === 'offline' ? 'Connection unavailable' : 'Connecting to database'}
+            </span>
+            {lastUpdated && <span className="text-gray-500">Updated {timeAgo(lastUpdated.toISOString())}</span>}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {pendingOrders > 0 && (

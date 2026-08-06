@@ -92,6 +92,7 @@ $router->get('/api/landing',             'MiscController@landing');
 $router->get('/api/recently-viewed',     'MiscController@recentlyViewed');
 $router->post('/api/recently-viewed',    'MiscController@trackView');
 $router->get('/api/offers',              'MiscController@offers');
+$router->get('/api/banners/{id}/image',  'MiscController@bannerImage');
 $router->get('/api/banners',             'MiscController@banners');
 $router->post('/api/notify-stock',       'MiscController@notifyStock');
 

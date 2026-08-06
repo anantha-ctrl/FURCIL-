@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Heart, ShoppingBag, User, Menu, X, Sun, Moon, ChevronDown, LogOut, Package, Gift, LayoutDashboard } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -10,9 +10,7 @@ import api from '../../api/client';
 import Logo from '../../components/Logo';
 
 export default function LandingNav() {
-  const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
-  const { scrollY } = useScroll();
   const { count } = useCart();
   const { count: wish } = useWishlist();
   const { user, logout } = useAuth();
@@ -24,10 +22,17 @@ export default function LandingNav() {
   // Nav links are driven live from the DB categories (respects the storefront
   // scope, e.g. a men-only store) — "Collections" always leads the list.
   const [cats, setCats] = useState([]);
-  useEffect(() => { api.get('/api/categories').then((r) => setCats(r.data.data)).catch(() => {}); }, []);
+  useEffect(() => {
+    let active = true;
+    const load = () => api.get('/api/categories').then((r) => {
+      if (active) setCats(Array.isArray(r.data.data) ? r.data.data : []);
+    }).catch(() => {});
+    load();
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 15000);
+    return () => { active = false; clearInterval(timer); };
+  }, []);
   const LINKS = [['Collections', '/shop'], ...cats.map((c) => [c.name, `/category/${c.slug}`])];
 
-  useMotionValueEvent(scrollY, 'change', (y) => setSolid(y > 60));
   useEffect(() => { document.body.style.overflow = open ? 'hidden' : ''; }, [open]);
 
   // Close the account dropdown on an outside click.
@@ -54,18 +59,15 @@ export default function LandingNav() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${solid
-        ? 'border-b border-white/40 bg-white/70 shadow-[0_8px_30px_-16px_rgba(17,17,17,0.25)] backdrop-blur-xl dark:border-white/10 dark:bg-ink/70'
-        : 'bg-transparent'
-        }`}
+      className="fixed inset-x-0 top-0 z-50 border-b border-luxe-ink/10 bg-white/95 shadow-[0_8px_30px_-16px_rgba(17,17,17,0.18)] backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-ink/95"
     >
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
         <Link to="/" aria-label="FURCIL home" className="shrink-0">
-          <Logo white={solid && theme === 'dark'} className="h-10 transition-all duration-500" />
+          <Logo white={theme === 'dark'} className="h-10" />
         </Link>
 
         {/* Desktop links */}
-        <ul className={`hidden items-center gap-9 lg:flex ${solid ? 'text-luxe-ink dark:text-white' : 'text-luxe-ink'}`}>
+        <ul className="hidden items-center gap-9 text-luxe-ink lg:flex dark:text-white">
           {LINKS.map(([label, to]) => (
             <li key={label}>
               <Link
@@ -80,13 +82,13 @@ export default function LandingNav() {
         </ul>
 
         {/* Icons */}
-        <div className={`flex items-center gap-1 sm:gap-2 ${solid ? 'text-luxe-ink dark:text-white' : 'text-luxe-ink'}`}>
-          <Link to="/shop" className="hidden rounded-full p-2.5 transition hover:bg-black/5 dark:hover:bg-white/10 sm:block" aria-label="Search"><Search size={19} /></Link>
-          <Link to="/wishlist" className="relative rounded-full p-2.5 transition hover:bg-black/5" aria-label="Wishlist">
+        <div className="flex items-center gap-1 text-luxe-ink sm:gap-2 dark:text-white">
+          <Link to="/shop" className="hidden rounded-full p-2.5 transition hover:bg-black/5 sm:block dark:hover:bg-white/10" aria-label="Search"><Search size={19} /></Link>
+          <Link to="/wishlist" className="relative rounded-full p-2.5 transition hover:bg-black/5 dark:hover:bg-white/10" aria-label="Wishlist">
             <Heart size={19} />
             {wish > 0 && <Badge>{wish}</Badge>}
           </Link>
-          <Link to="/cart" className="relative rounded-full p-2.5 transition hover:bg-black/5" aria-label="Cart">
+          <Link to="/cart" className="relative rounded-full p-2.5 transition hover:bg-black/5 dark:hover:bg-white/10" aria-label="Cart">
             <ShoppingBag size={19} />
             {count > 0 && <Badge>{count}</Badge>}
           </Link>
@@ -127,7 +129,7 @@ export default function LandingNav() {
               )}
             </AnimatePresence>
           </div>
-          <button onClick={() => setOpen(true)} className="rounded-full p-2.5 transition hover:bg-black/5 lg:hidden" aria-label="Menu"><Menu size={20} /></button>
+          <button onClick={() => setOpen(true)} className="rounded-full p-2.5 transition hover:bg-black/5 dark:hover:bg-white/10 lg:hidden" aria-label="Menu"><Menu size={20} /></button>
         </div>
       </nav>
 

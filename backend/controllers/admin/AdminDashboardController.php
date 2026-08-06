@@ -134,19 +134,19 @@ class AdminDashboardController
         // ── Activity feed — last 10 events from orders, customers, reviews, messages ──
         $activity = $db->query("
             (SELECT 'order' AS type,
-                    CONCAT('New order ', order_number) AS title,
+                    CONVERT(CONCAT('New order ', order_number) USING utf8mb4) COLLATE utf8mb4_unicode_ci AS title,
                     CONCAT('₹', FORMAT(total, 0), ' · ', status) AS description,
                     placed_at AS time
              FROM orders ORDER BY placed_at DESC LIMIT 5)
             UNION ALL
             (SELECT 'customer' AS type,
-                    CONCAT(name, ' joined') AS title,
-                    email AS description,
+                    CONVERT(CONCAT(name, ' joined') USING utf8mb4) COLLATE utf8mb4_unicode_ci AS title,
+                    CONVERT(email USING utf8mb4) COLLATE utf8mb4_unicode_ci AS description,
                     created_at AS time
              FROM users WHERE role='customer' ORDER BY created_at DESC LIMIT 3)
             UNION ALL
             (SELECT 'review' AS type,
-                    CONCAT(u.name, ' reviewed') AS title,
+                    CONVERT(CONCAT(u.name, ' reviewed') USING utf8mb4) COLLATE utf8mb4_unicode_ci AS title,
                     CONCAT(p.name, ' · ', r.rating, '★') AS description,
                     r.created_at AS time
              FROM reviews r
@@ -155,8 +155,8 @@ class AdminDashboardController
              ORDER BY r.created_at DESC LIMIT 2)
             UNION ALL
             (SELECT 'message' AS type,
-                    CONCAT('Message from ', name) AS title,
-                    subject AS description,
+                    CONVERT(CONCAT('Message from ', name) USING utf8mb4) COLLATE utf8mb4_unicode_ci AS title,
+                    CONVERT(subject USING utf8mb4) COLLATE utf8mb4_unicode_ci AS description,
                     created_at AS time
              FROM contact_messages ORDER BY created_at DESC LIMIT 2)
             ORDER BY time DESC
